@@ -53,11 +53,6 @@ function PageInner({ content: c }) {
             </a>
             <a className="btn btn-outline btn-lg" href="#program"><span>{c.hero.ctaSecondary}</span></a>
           </div>
-          <div className="hero-meta">
-            <div className="item"><Icon name="clock" /><span>{c.contact.hoursWeekday}</span></div>
-            <div className="item"><Icon name="pin" /><span>{t.hero.location}</span></div>
-            <div className="item"><Icon name="check" /><span>{t.hero.level}</span></div>
-          </div>
         </div>
         <div className="scroll-cue"><div className="mouse" /><span>{t.hero.scroll}</span></div>
       </section>
