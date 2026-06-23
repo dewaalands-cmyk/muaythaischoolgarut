@@ -325,14 +325,6 @@ export default async function Home() {
                 <div><div className="lbl">Lokasi</div><div className="val">{c.contact.address}</div></div>
               </div>
 
-              <div className="socials">
-                {socials.map((s) => (
-                  <a key={s.k} href={s.url} target="_blank" rel="noopener" aria-label={s.k}>
-                    <Icon name={s.k} />
-                  </a>
-                ))}
-              </div>
-
               {c.contact.mapsEmbed && c.contact.mapsEmbed.includes("google.com/maps/embed") && (
                 <div className="map-embed">
                   <iframe src={c.contact.mapsEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Lokasi Camp 3GRT" />
@@ -404,7 +396,6 @@ export default async function Home() {
         </div>
       </footer>
 
-      <FloatingButtons whatsapp={c.contact.whatsapp} />
       <ScrollFX />
     </>
   );
