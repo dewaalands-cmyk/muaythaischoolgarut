@@ -14,10 +14,26 @@ export async function GET() {
   return NextResponse.json(content);
 }
 
+async function fixMapsUrl(url) {
+  if (!url) return url;
+  if (url.includes("google.com/maps/embed") || url.includes("output=embed")) return url;
+  // Short link or share link — follow redirect to get full URL, convert to embed
+  try {
+    const res = await fetch(url, { method: "HEAD", redirect: "follow" });
+    const full = res.url;
+    const match = full.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) return `https://maps.google.com/maps?q=${match[1]},${match[2]}&z=17&output=embed`;
+  } catch {}
+  return url;
+}
+
 export async function PUT(request) {
   if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const data = await request.json();
+    if (data.contact?.mapsEmbed) {
+      data.contact.mapsEmbed = await fixMapsUrl(data.contact.mapsEmbed);
+    }
     await saveSiteContent(data);
     return NextResponse.json({ ok: true });
   } catch (e) {
