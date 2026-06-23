@@ -303,7 +303,7 @@ export default async function Home() {
         <div className="container">
           <h2>Siap Jadi Lebih Kuat?</h2>
           <p>Langkah pertama selalu yang paling berat. Mulai latihan pertamamu di Camp 3GRT hari ini.</p>
-          <a className="btn btn-primary btn-lg" href={waLink(c.contact.whatsapp, "Halo Camp 3GRT, saya mau daftar kelas pertama.")} target="_blank" rel="noopener">
+          <a className="btn btn-primary btn-lg" href="#kontak">
             Daftar Kelas Pertama
           </a>
         </div>
