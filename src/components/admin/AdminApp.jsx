@@ -802,11 +802,25 @@ export default function AdminApp({ initialContent, initialMessages }) {
               </div>
               <div className="box">
                 <div className="box-title">Peta Google Maps</div>
-                <Area label="URL Embed Peta Google Maps" value={C.contact.mapsEmbed} onChange={(v) => edit((c) => (c.contact.mapsEmbed = v))} rows={2} hint='Buka Google Maps → cari lokasi → klik Bagikan → tab "Sematkan peta" → klik "SALIN HTML" → ambil hanya URL di dalam src="..." (harus dimulai dengan https://www.google.com/maps/embed)' />
+                <Area label="URL Embed Peta Google Maps" value={C.contact.mapsEmbed} onChange={(v) => edit((c) => (c.contact.mapsEmbed = v))} rows={2} hint='Paste link Google Maps apa saja — sistem akan otomatis konversi ke format embed saat disimpan.' />
                 {C.contact.mapsEmbed && !C.contact.mapsEmbed.includes("google.com/maps") && (
                   <p style={{ color: "#f59e0b", fontSize: "0.8rem", marginTop: "0.4rem" }}>
                     ⚠ URL ini bukan URL Google Maps. Peta tidak akan tampil.
                   </p>
+                )}
+                {C.contact.mapsEmbed && C.contact.mapsEmbed.includes("google.com/maps") && (
+                  <div style={{ marginTop: "0.75rem", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)" }}>
+                    <iframe
+                      src={C.contact.mapsEmbed.includes("output=embed") || C.contact.mapsEmbed.includes("maps/embed") ? C.contact.mapsEmbed : undefined}
+                      width="100%" height="200" style={{ border: "none", display: "block" }}
+                      loading="lazy" title="Preview Peta"
+                    />
+                    {!C.contact.mapsEmbed.includes("output=embed") && !C.contact.mapsEmbed.includes("maps/embed") && (
+                      <p style={{ padding: "0.5rem", color: "var(--text-muted)", fontSize: "0.8rem", textAlign: "center" }}>
+                        Preview akan muncul setelah disimpan (sistem otomatis konversi URL).
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
