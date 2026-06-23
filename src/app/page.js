@@ -391,7 +391,7 @@ export default async function Home() {
           )}
           <div className="footer-bottom">
             <span>© {year} Camp 3GRT Muaythai School Garut. All rights reserved.</span>
-            <span>Dibuat oleh <a href="#" style={{ color: "var(--red)", fontWeight: 600 }}>Pagiverse Studio</a></span>
+            <span>Dibuat oleh <a href="https://pagiversestudio.vercel.app/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--red)", fontWeight: 600 }}>Pagiverse Studio</a></span>
           </div>
         </div>
       </footer>
