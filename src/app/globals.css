@@ -117,9 +117,9 @@ h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; line-height: 1.2; }
 
 /* ===== ABOUT ===== */
 .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-.about-media { position: relative; }
+.about-media { position: relative; padding-bottom: 4rem; }
 .about-media img { border-radius: var(--radius); width: 100%; aspect-ratio: 4/5; object-fit: cover; }
-.badge-float { position: absolute; bottom: -1.5rem; right: -1.5rem; background: var(--red); color: #fff; padding: 1rem 1.25rem; border-radius: var(--radius-sm); }
+.badge-float { position: absolute; bottom: 0; right: 0; background: var(--red); color: #fff; padding: 1rem 1.25rem; border-radius: var(--radius-sm); box-shadow: 0 0 20px var(--red-glow); }
 .badge-float .num { font-family: 'Oswald', sans-serif; font-size: 1.6rem; font-weight: 700; display: block; }
 .badge-float .lbl { font-size: 0.7rem; opacity: 0.9; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 2rem; }
@@ -1081,7 +1081,7 @@ h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; line-height: 1.2; }
   .nav-links a { font-size: 1.2rem; }
   .nav-toggle { display: flex; z-index: 100; }
   .about-grid, .contact-grid { grid-template-columns: 1fr; }
-  .badge-float { right: 0; bottom: -1rem; }
+  .badge-float { right: 0; bottom: 0; }
   .grid-3, .testi-grid, .price-grid { grid-template-columns: 1fr 1fr; }
   .gallery-item { flex: 0 0 calc(70% - 0.5rem); }
   .sched-grid { grid-template-columns: repeat(2, 1fr); }
