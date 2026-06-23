@@ -341,7 +341,7 @@ export default async function Home() {
                 ))}
               </div>
 
-              {c.contact.mapsEmbed && (
+              {c.contact.mapsEmbed && c.contact.mapsEmbed.includes("google.com/maps/embed") && (
                 <div className="map-embed">
                   <iframe src={c.contact.mapsEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Lokasi Camp 3GRT" />
                 </div>
