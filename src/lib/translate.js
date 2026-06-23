@@ -17,6 +17,7 @@ async function translateOne(text, sl = "id", tl = "en") {
   try {
     const res = await fetch(url, {
       signal: ctrl.signal,
+      cache: "no-store",
       headers: { "User-Agent": "Mozilla/5.0", Accept: "*/*" },
     });
     if (!res.ok) throw new Error("translate http " + res.status);
