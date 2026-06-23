@@ -38,3 +38,15 @@ model AdminUser {
   passwordHash String
   updatedAt    DateTime @updatedAt
 }
+
+// Statistik pengunjung. Satu baris = 1 pengunjung unik per hari (zona WIB).
+// "visitor" = token acak dari cookie, "day" = tanggal (tanpa jam).
+model PageView {
+  id        String   @id @default(cuid())
+  day       DateTime @db.Date
+  visitor   String
+  createdAt DateTime @default(now())
+
+  @@unique([day, visitor])
+  @@index([day])
+}

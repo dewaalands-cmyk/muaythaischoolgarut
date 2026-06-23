@@ -1,5 +1,6 @@
 import { getSiteContent } from "@/lib/content";
 import PageContent from "@/components/site/PageContent";
+import VisitTracker from "@/components/site/VisitTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default async function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <VisitTracker />
       <PageContent content={c} />
     </>
   );

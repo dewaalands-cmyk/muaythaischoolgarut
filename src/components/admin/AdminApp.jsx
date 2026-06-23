@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { waLink } from "@/lib/wa";
 import { defaultContent } from "@/lib/defaultContent";
@@ -32,6 +32,8 @@ const ADMIN_ICONS = {
   menu: '<path d="M3 12h18M3 6h18M3 18h18"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
   handshake: '<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/>',
+  chart: '<path d="M3 3v18h18"/><path d="m7 14 3-4 4 3 5-7"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
 };
 
 function I({ name }) {
@@ -233,6 +235,70 @@ function AddBtn({ onClick, label }) {
   );
 }
 
+/* ============== GRAFIK PENGUNJUNG ============== */
+const ID_MON = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+const RANGE_DAYS = { d7: 7, d30: 30, d90: 90 };
+
+function fmtShort(d) {
+  const [, m, day] = d.split("-");
+  return `${parseInt(day, 10)} ${ID_MON[parseInt(m, 10) - 1]}`;
+}
+function fmtFull(d) {
+  const [y, m, day] = d.split("-");
+  return `${parseInt(day, 10)} ${ID_MON[parseInt(m, 10) - 1]} ${y}`;
+}
+function buildSeries(daily, range, today) {
+  const map = new Map((daily || []).map((d) => [d.date, d.count]));
+  const DAY = 86400000;
+  const todayDate = new Date((today || new Date().toISOString().slice(0, 10)) + "T00:00:00.000Z");
+  let start;
+  if (range === "all") {
+    start = daily && daily.length ? new Date(daily[0].date + "T00:00:00.000Z") : todayDate;
+  } else {
+    const n = RANGE_DAYS[range] || 30;
+    start = new Date(todayDate.getTime() - (n - 1) * DAY);
+  }
+  const out = [];
+  for (let t = start.getTime(); t <= todayDate.getTime(); t += DAY) {
+    const ds = new Date(t).toISOString().slice(0, 10);
+    out.push({ date: ds, count: map.get(ds) || 0 });
+  }
+  return out;
+}
+
+function VisitorChart({ daily, range, today }) {
+  const series = useMemo(() => buildSeries(daily, range, today), [daily, range, today]);
+  const max = Math.max(1, ...series.map((s) => s.count));
+  const step = Math.max(1, Math.ceil(series.length / 8));
+  const total = series.reduce((a, b) => a + b.count, 0);
+
+  if (series.length === 0) {
+    return <div className="chart-empty">Belum ada data pengunjung.</div>;
+  }
+  return (
+    <div className="chart-wrap">
+      <div className="chart" style={series.length > 45 ? { overflowX: "auto" } : undefined}>
+        <div className="chart-inner" style={series.length > 45 ? { minWidth: series.length * 11 } : undefined}>
+          <div className="chart-bars">
+            {series.map((s) => (
+              <div key={s.date} className="chart-bar" title={`${fmtFull(s.date)}: ${s.count} pengunjung`}>
+                {s.count > 0 && <span className="bar-val">{s.count}</span>}
+                <div className="bar" style={{ height: `${(s.count / max) * 100}%` }} />
+              </div>
+            ))}
+          </div>
+          <div className="chart-axis">
+            {series.map((s, i) => (
+              <div key={s.date} className="chart-tick">{i % step === 0 ? fmtShort(s.date) : ""}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="chart-foot">Total {total} kunjungan pada rentang ini.</div>
+    </div>
+  );
+}
+
 /* ============== KOMPONEN UTAMA ============== */
 export default function AdminApp({ initialContent, initialMessages }) {
   const router = useRouter();
@@ -245,8 +311,19 @@ export default function AdminApp({ initialContent, initialMessages }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [msgFilter, setMsgFilter] = useState("all");
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
+  const [analytics, setAnalytics] = useState(null);
+  const [range, setRange] = useState("d30");
 
   const unread = messages.filter((m) => !m.read).length;
+
+  async function refreshAnalytics() {
+    try {
+      const res = await fetch("/api/admin/analytics");
+      if (res.ok) setAnalytics(await res.json());
+    } catch {}
+  }
+  // muat statistik pengunjung saat dashboard dibuka
+  useEffect(() => { refreshAnalytics(); }, []);
 
   // peringatkan kalau menutup tab dengan perubahan belum disimpan
   useEffect(() => {
@@ -460,6 +537,46 @@ export default function AdminApp({ initialContent, initialMessages }) {
                 <I name="check" />
                 <div>Semua perubahan tersimpan di <b>database</b> dan langsung tampil ke semua pengunjung dari perangkat mana pun.</div>
               </div>
+
+              {/* ---- Statistik Pengunjung ---- */}
+              <div className="box">
+                <div className="box-title">
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><I name="chart" /> Statistik Pengunjung</span>
+                  <button className="btn btn-ghost btn-sm" onClick={refreshAnalytics}><I name="refresh" /> Muat ulang</button>
+                </div>
+                {(() => {
+                  const a = analytics || { totals: { d7: 0, d30: 0, d90: 0, all: 0 }, daily: [], today: undefined };
+                  const cards = [
+                    ["d7", "7 Hari Terakhir", a.totals.d7],
+                    ["d30", "30 Hari Terakhir", a.totals.d30],
+                    ["d90", "90 Hari Terakhir", a.totals.d90],
+                    ["all", "Sepanjang Waktu", a.totals.all],
+                  ];
+                  return (
+                    <>
+                      <div className="visitor-stats">
+                        {cards.map(([key, label, val]) => (
+                          <button
+                            key={key}
+                            className={"vstat" + (range === key ? " active" : "")}
+                            onClick={() => setRange(key)}
+                          >
+                            <div className="vstat-ic"><I name="users" /></div>
+                            <div className="v">{val ?? 0}</div>
+                            <div className="l">{label}</div>
+                          </button>
+                        ))}
+                      </div>
+                      {!analytics ? (
+                        <div className="chart-empty">Memuat data…</div>
+                      ) : (
+                        <VisitorChart daily={a.daily} range={range} today={a.today} />
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+
               <div className="box">
                 <div className="box-title">Pesan Terbaru
                   <button className="btn btn-ghost btn-sm" onClick={() => go("messages")}>Lihat Semua</button>

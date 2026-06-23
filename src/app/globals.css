@@ -942,6 +942,90 @@ h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; line-height: 1.2; }
 }
 .stat-card .l { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
 
+/* ----- STATISTIK PENGUNJUNG ----- */
+.visitor-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.vstat {
+  text-align: left;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
+}
+.vstat:hover { border-color: rgba(255,20,40,0.4); transform: translateY(-1px); }
+.vstat.active { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 0 18px rgba(255,20,40,0.22); }
+.vstat-ic {
+  width: 34px; height: 34px;
+  background: rgba(255,20,40,0.12);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+.vstat-ic svg { width: 17px; height: 17px; }
+.vstat .v { font-family: 'Oswald', sans-serif; font-size: 1.7rem; font-weight: 700; color: #fff; line-height: 1; }
+.vstat.active .v { color: var(--red); }
+.vstat .l { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+.chart-wrap { margin-top: 4px; }
+.chart { width: 100%; }
+.chart-inner { width: 100%; }
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 200px;
+  padding-top: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.chart-bar {
+  flex: 1 1 0;
+  min-width: 4px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+}
+.chart-bar .bar {
+  width: 72%;
+  min-height: 2px;
+  background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 100%);
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 0 8px rgba(255,20,40,0.35);
+  transition: filter .15s;
+}
+.chart-bar:hover .bar { filter: brightness(1.25); }
+.chart-bar .bar-val {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted-2);
+  margin-bottom: 3px;
+  opacity: 0;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.chart-bar:hover .bar-val { opacity: 1; color: #fff; }
+.chart-axis { display: flex; gap: 3px; margin-top: 6px; }
+.chart-tick {
+  flex: 1 1 0;
+  min-width: 4px;
+  font-size: 10px;
+  color: var(--muted-2);
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+}
+.chart-foot { margin-top: 10px; font-size: 12.5px; color: var(--muted-2); }
+.chart-empty { padding: 28px 0; text-align: center; color: var(--muted-2); font-size: 14px; }
+
 /* ----- MESSAGES ----- */
 .msg-toolbar {
   display: flex;
