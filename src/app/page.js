@@ -71,7 +71,7 @@ export default async function Home() {
           </h1>
           <p className="hero-sub">{c.hero.subtitle}</p>
           <div className="hero-actions">
-            <a className="btn btn-primary btn-lg" href={waLink(c.contact.whatsapp, "Halo Camp 3GRT, saya mau tanya soal kelas Muay Thai.")} target="_blank" rel="noopener">
+            <a className="btn btn-primary btn-lg" href="#kontak">
               <Icon name="whatsapp" /> <span>{c.hero.ctaPrimary}</span>
             </a>
             <a className="btn btn-outline btn-lg" href="#program"><span>{c.hero.ctaSecondary}</span></a>

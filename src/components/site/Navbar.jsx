@@ -63,9 +63,7 @@ export default function Navbar({ brand, whatsapp }) {
           <li>
             <a
               className="btn btn-primary btn-sm"
-              href={waLink(whatsapp, "Halo Camp 3GRT, saya ingin tanya-tanya.")}
-              target="_blank"
-              rel="noopener"
+              href="#kontak"
               onClick={() => setOpen(false)}
             >
               Daftar Sekarang
