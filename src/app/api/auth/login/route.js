@@ -25,6 +25,7 @@ export async function POST(request) {
     });
     return res;
   } catch (e) {
-    return NextResponse.json({ error: "Terjadi kesalahan server" }, { status: 500 });
+    console.error("[login error]", e?.message || e);
+    return NextResponse.json({ error: "Terjadi kesalahan server: " + (e?.message || String(e)) }, { status: 500 });
   }
 }
