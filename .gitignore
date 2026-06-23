@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Environment variables — JANGAN pernah commit file ini!
+.env
+.env.local
+.env.production
+.env*.local
+
+# Prisma generated client
+prisma/generated/
+
+# Uploaded images (di production pakai Vercel Blob)
+public/images/*.jpg
+public/images/*.jpeg
+public/images/*.png
+public/images/*.webp
+public/images/*.gif
+# Kecualikan logo SVG bawaan
+!public/images/logo.svg
+
+# Claude Code internal files
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/

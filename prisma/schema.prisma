@@ -1,0 +1,40 @@
+// Prisma schema - Camp 3GRT CMS
+// Database: PostgreSQL (Neon)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Semua isi website disimpan sebagai 1 baris JSON (id = 1).
+// Strukturnya sama persis dengan objek "defaultContent".
+model SiteContent {
+  id        Int      @id @default(1)
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
+// Pesan / pendaftaran yang masuk dari form di website.
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  program   String
+  message   String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// Akun admin (login dashboard). Password disimpan sebagai hash bcrypt.
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @default("admin")
+  passwordHash String
+  updatedAt    DateTime @updatedAt
+}

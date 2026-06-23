@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect width="80" height="80" rx="16" fill="#1a1a1a"/>
+  <rect width="80" height="80" rx="16" fill="#e01a1a" fill-opacity="0.12"/>
+  <rect x="8" y="8" width="64" height="64" rx="12" fill="none" stroke="#e01a1a" stroke-width="1.5" stroke-opacity="0.3"/>
+  <text x="40" y="30" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="19" fill="#e01a1a" text-anchor="middle" letter-spacing="1">3GRT</text>
+  <line x1="18" y1="36" x2="62" y2="36" stroke="#e01a1a" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="40" y="50" font-family="Arial, sans-serif" font-weight="700" font-size="8.5" fill="#aaaaaa" text-anchor="middle" letter-spacing="2">MUAY THAI</text>
+  <text x="40" y="62" font-family="Arial, sans-serif" font-weight="600" font-size="7" fill="#666666" text-anchor="middle" letter-spacing="1.5">SCHOOL GARUT</text>
+</svg>
