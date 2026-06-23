@@ -321,16 +321,8 @@ export default async function Home() {
           <div className="contact-grid">
             <div className="contact-info reveal">
               <div className="info-row">
-                <div className="ic"><Icon name="phone" /></div>
-                <div><div className="lbl">Telepon / WhatsApp</div><div className="val"><a href={"tel:" + tel}>{c.contact.phone}</a></div></div>
-              </div>
-              <div className="info-row">
                 <div className="ic"><Icon name="pin" /></div>
                 <div><div className="lbl">Lokasi</div><div className="val">{c.contact.address}</div></div>
-              </div>
-              <div className="info-row">
-                <div className="ic"><Icon name="clock" /></div>
-                <div><div className="lbl">Jam Buka</div><div className="val">{c.contact.hoursWeekday}</div></div>
               </div>
 
               <div className="socials">
