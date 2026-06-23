@@ -325,9 +325,9 @@ export default async function Home() {
                 <div><div className="lbl">Lokasi</div><div className="val">{c.contact.address}</div></div>
               </div>
 
-              {c.contact.mapsEmbed && c.contact.mapsEmbed.includes("google.com/maps/embed") && (
+              {c.contact.mapsEmbed && c.contact.mapsEmbed.includes("google.com/maps") && (
                 <div className="map-embed">
-                  <iframe src={c.contact.mapsEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Lokasi Camp 3GRT" />
+                  <iframe src={c.contact.mapsEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Lokasi Camp 3GRT" allowFullScreen />
                 </div>
               )}
             </div>

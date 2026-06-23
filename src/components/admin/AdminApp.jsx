@@ -803,9 +803,9 @@ export default function AdminApp({ initialContent, initialMessages }) {
               <div className="box">
                 <div className="box-title">Peta Google Maps</div>
                 <Area label="URL Embed Peta Google Maps" value={C.contact.mapsEmbed} onChange={(v) => edit((c) => (c.contact.mapsEmbed = v))} rows={2} hint='Buka Google Maps → cari lokasi → klik Bagikan → tab "Sematkan peta" → klik "SALIN HTML" → ambil hanya URL di dalam src="..." (harus dimulai dengan https://www.google.com/maps/embed)' />
-                {C.contact.mapsEmbed && !C.contact.mapsEmbed.includes("google.com/maps/embed") && (
+                {C.contact.mapsEmbed && !C.contact.mapsEmbed.includes("google.com/maps") && (
                   <p style={{ color: "#f59e0b", fontSize: "0.8rem", marginTop: "0.4rem" }}>
-                    ⚠ URL ini bukan format embed. Peta tidak akan tampil. Gunakan URL dari tab "Sematkan peta", bukan link berbagi biasa.
+                    ⚠ URL ini bukan URL Google Maps. Peta tidak akan tampil.
                   </p>
                 )}
               </div>
