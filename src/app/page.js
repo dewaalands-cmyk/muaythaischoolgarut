@@ -334,7 +334,7 @@ export default async function Home() {
 
             <div className="reveal d1">
               <div style={{ marginBottom: 0 }}>
-                <ContactForm programs={c.programs} whatsapp={c.contact.whatsapp} />
+                <ContactForm pricing={c.pricing} whatsapp={c.contact.whatsapp} />
               </div>
             </div>
           </div>

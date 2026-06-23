@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { waLink } from "@/lib/wa";
 
-export default function ContactForm({ programs = [], whatsapp }) {
+export default function ContactForm({ pricing = [], whatsapp }) {
   const [form, setForm] = useState({ name: "", phone: "", program: "", message: "" });
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -44,13 +44,13 @@ export default function ContactForm({ programs = [], whatsapp }) {
         </div>
       </div>
       <div className="fld">
-        <label>Program yang Diminati *</label>
+        <label>Paket yang Diminati *</label>
         <select value={form.program} onChange={set("program")} required>
-          <option value="">-- Pilih Program --</option>
-          {programs.map((p) => (
-            <option key={p.id} value={p.name}>{p.name}</option>
+          <option value="">-- Pilih Paket --</option>
+          {pricing.map((p) => (
+            <option key={p.id} value={p.name}>{p.name}{p.price ? ` – Rp ${p.price}${p.period || ""}` : ""}</option>
           ))}
-          <option value="Lainnya">Lainnya / Tanya Dulu</option>
+          <option value="Lainnya / Tanya Dulu">Lainnya / Tanya Dulu</option>
         </select>
       </div>
       <div className="fld">
