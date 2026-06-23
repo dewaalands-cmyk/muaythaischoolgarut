@@ -10,13 +10,21 @@ import ScrollFX from "@/components/site/ScrollFX";
 // Selalu ambil konten terbaru dari database (live untuk semua pengunjung).
 export const dynamic = "force-dynamic";
 
+function toUrl(val, fallback) {
+  if (!val) return null;
+  return val.startsWith("http") ? val : fallback(val);
+}
 function buildSocials(ct) {
   const out = [];
-  if (ct.instagram) out.push({ k: "instagram", url: "https://instagram.com/" + ct.instagram.replace(/^@/, "") });
-  if (ct.tiktok) out.push({ k: "tiktok", url: "https://tiktok.com/@" + ct.tiktok.replace(/^@/, "") });
-  if (ct.facebook) out.push({ k: "facebook", url: "https://facebook.com/" + encodeURIComponent(ct.facebook) });
-  if (ct.youtube) out.push({ k: "youtube", url: "https://youtube.com/results?search_query=" + encodeURIComponent(ct.youtube) });
-  out.push({ k: "whatsapp", url: waLink(ct.whatsapp) });
+  const ig = toUrl(ct.instagram, (v) => "https://instagram.com/" + v.replace(/^@/, ""));
+  const tt = toUrl(ct.tiktok, (v) => "https://tiktok.com/@" + v.replace(/^@/, ""));
+  const fb = toUrl(ct.facebook, (v) => "https://facebook.com/" + v);
+  const yt = toUrl(ct.youtube, (v) => "https://youtube.com/" + v);
+  if (ig) out.push({ k: "instagram", url: ig, label: "Instagram" });
+  if (tt) out.push({ k: "tiktok", url: tt, label: "TikTok" });
+  if (fb) out.push({ k: "facebook", url: fb, label: "Facebook" });
+  if (yt) out.push({ k: "youtube", url: yt, label: "YouTube" });
+  if (ct.whatsapp) out.push({ k: "whatsapp", url: waLink(ct.whatsapp), label: "WhatsApp" });
   return out;
 }
 
@@ -387,6 +395,16 @@ export default async function Home() {
               <span className="fcontact">{c.contact.hoursWeekday}</span>
             </div>
           </div>
+          {socials.length > 0 && (
+            <div className="footer-socials">
+              {socials.map((s) => (
+                <a key={s.k} href={s.url} target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label={s.label}>
+                  <Icon name={s.k} size={20} />
+                  <span>{s.label}</span>
+                </a>
+              ))}
+            </div>
+          )}
           <div className="footer-bottom">
             <span>© {year} Camp 3GRT Muaythai School Garut. All rights reserved.</span>
             <span>Dibuat oleh <a href="#" style={{ color: "var(--red)", fontWeight: 600 }}>Pagiverse Studio</a></span>
