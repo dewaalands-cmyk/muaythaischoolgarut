@@ -73,10 +73,6 @@ export default function LoginPage() {
           {loading ? "Memproses..." : "Masuk Dashboard"}
         </button>
 
-        <div className="login-hint">
-          Sandi default: <code>admin3grt</code>
-          <br />Ganti sandi setelah masuk lewat menu Pengaturan.
-        </div>
       </div>
     </div>
   );
