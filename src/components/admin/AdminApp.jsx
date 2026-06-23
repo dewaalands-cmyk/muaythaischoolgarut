@@ -31,6 +31,7 @@ const ADMIN_ICONS = {
   refresh: '<path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>',
   menu: '<path d="M3 12h18M3 6h18M3 18h18"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
+  handshake: '<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/>',
 };
 
 function I({ name }) {
@@ -56,6 +57,7 @@ const NAV = [
       ["testimonials", "Testimoni", "quote"],
       ["faq", "FAQ", "help"],
       ["gallery", "Galeri", "image"],
+      ["partners", "Mitra", "handshake"],
       ["contact", "Kontak", "phone"],
     ],
   },
@@ -66,7 +68,7 @@ const TITLES = {
   brand: "Brand & Logo", hero: "Hero / Banner", values: "Nilai / Ticker",
   about: "Tentang Kami", programs: "Program Latihan", coaches: "Tim Coach",
   schedule: "Jadwal Kelas", pricing: "Membership & Harga",
-  testimonials: "Testimoni", faq: "FAQ", gallery: "Galeri", contact: "Kontak", settings: "Pengaturan",
+  testimonials: "Testimoni", faq: "FAQ", gallery: "Galeri", partners: "Mitra Kami", contact: "Kontak", settings: "Pengaturan",
 };
 const ICON_OPTIONS = [
   { value: "users", label: "Grup (users)" }, { value: "target", label: "Target" },
@@ -774,6 +776,22 @@ export default function AdminApp({ initialContent, initialMessages }) {
                 </ItemCard>
               ))}
               <AddBtn label="Tambah Foto" onClick={() => edit((c) => c.gallery.push({ image: "", caption: "Caption foto" }))} />
+            </div>
+          )}
+
+          {/* ---------- PARTNERS ---------- */}
+          {panel === "partners" && (
+            <div className="panel active">
+              <div className="panel-intro"><h3>Mitra Kami</h3><p>Logo, nama, deskripsi, dan link website mitra. Bagian ini hanya tampil di website jika ada minimal 1 mitra.</p></div>
+              {(C.partners || []).map((p, i) => (
+                <ItemCard key={p.id || i} tag={p.name || "Mitra " + (i + 1)} onUp={() => move("partners", i, -1)} onDown={() => move("partners", i, 1)} onDelete={() => edit((c) => c.partners.splice(i, 1))}>
+                  <ImageField label="Logo Mitra" value={p.logo} onChange={(v) => edit((c) => (c.partners[i].logo = v))} />
+                  <Field label="Nama Mitra" value={p.name} onChange={(v) => edit((c) => (c.partners[i].name = v))} />
+                  <Area label="Deskripsi Singkat" value={p.desc} onChange={(v) => edit((c) => (c.partners[i].desc = v))} rows={2} placeholder="Penjelasan singkat tentang mitra ini..." />
+                  <Field label="Website (opsional)" value={p.website} onChange={(v) => edit((c) => (c.partners[i].website = v))} placeholder="https://contoh.com" hint="Kosongkan jika tidak punya website. Jika diisi, akan muncul tombol 'Kunjungi Website'." />
+                </ItemCard>
+              ))}
+              <AddBtn label="Tambah Mitra" onClick={() => edit((c) => { if (!c.partners) c.partners = []; c.partners.push({ id: "m" + Date.now(), name: "Nama Mitra", logo: "", desc: "", website: "" }); })} />
             </div>
           )}
 

@@ -341,6 +341,35 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ============ MITRA ============ */}
+      {c.partners && c.partners.length > 0 && (
+        <section className="section" id="mitra" style={{ background: "var(--bg-2)" }}>
+          <div className="container">
+            <div className="section-head reveal">
+              <span className="eyebrow">Kolaborasi</span>
+              <h2 className="section-title">Mitra <span className="hl">Kami</span></h2>
+              <p className="section-sub">Bersama mitra terpercaya untuk ekosistem Muay Thai yang lebih baik.</p>
+            </div>
+            <div className="partners-grid reveal">
+              {c.partners.map((p, i) => (
+                <div key={p.id || i} className="partner-card">
+                  {p.logo && <img src={p.logo} alt={p.name} className="partner-logo" />}
+                  <div className="partner-info">
+                    <h3 className="partner-name">{p.name}</h3>
+                    {p.desc && <p className="partner-desc">{p.desc}</p>}
+                    {p.website && (
+                      <a href={p.website} target="_blank" rel="noopener noreferrer" className="partner-link">
+                        Kunjungi Website <Icon name="external" size={14} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ============ FOOTER ============ */}
       <footer className="footer">
         <div className="container">

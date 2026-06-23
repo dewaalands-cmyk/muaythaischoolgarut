@@ -100,6 +100,7 @@ export const defaultContent = {
     { q: "Bagaimana cara mendaftar?", a: "Hubungi kami via WhatsApp atau isi form di bagian Kontak. Tim kami akan menghubungi kamu." },
     { q: "Apakah harus membawa perlengkapan sendiri?", a: "Untuk trial, kamu tidak perlu membawa apa-apa. Kami menyediakan perlengkapan dasar. Untuk member, disarankan punya sarung tinju sendiri." },
   ],
+  partners: [],
   contact: {
     phone: "0895-2437-8203",
     whatsapp: "6289524378203",
