@@ -571,17 +571,31 @@ export default function AdminApp({ initialContent, initialMessages }) {
             <div className="panel active">
               <div className="panel-intro"><h3>Hero / Banner</h3><p>Bagian paling atas website — kesan pertama pengunjung.</p></div>
               <div className="box">
-                <Field label="Badge (teks kecil di atas judul)" value={C.hero.badge} onChange={(v) => edit((c) => (c.hero.badge = v))} />
+                <div className="box-title">Bahasa Indonesia</div>
+                <Field label="Badge" value={C.hero.badge} onChange={(v) => edit((c) => (c.hero.badge = v))} />
                 <div className="grid-2">
                   <Field label="Judul Baris 1 (outline)" value={C.hero.titleTop} onChange={(v) => edit((c) => (c.hero.titleTop = v))} />
                   <Field label="Judul Baris 2 (solid)" value={C.hero.titleBottom} onChange={(v) => edit((c) => (c.hero.titleBottom = v))} />
                 </div>
-                <Area label="Subjudul" value={C.hero.subtitle} onChange={(v) => edit((c) => (c.hero.subtitle = v))} rows={3} />
+                <Area label="Subjudul" value={C.hero.subtitle} onChange={(v) => edit((c) => (c.hero.subtitle = v))} rows={2} />
                 <div className="grid-2">
                   <Field label="Teks Tombol Utama" value={C.hero.ctaPrimary} onChange={(v) => edit((c) => (c.hero.ctaPrimary = v))} />
                   <Field label="Teks Tombol Kedua" value={C.hero.ctaSecondary} onChange={(v) => edit((c) => (c.hero.ctaSecondary = v))} />
                 </div>
                 <ImageField label="Gambar Latar Hero" value={C.hero.bgImage} onChange={(v) => edit((c) => (c.hero.bgImage = v))} />
+              </div>
+              <div className="box">
+                <div className="box-title">English Version (EN)</div>
+                <Field label="Badge (EN)" value={C.hero.badgeEn} onChange={(v) => edit((c) => (c.hero.badgeEn = v))} />
+                <div className="grid-2">
+                  <Field label="Title Line 1 (EN)" value={C.hero.titleTopEn} onChange={(v) => edit((c) => (c.hero.titleTopEn = v))} />
+                  <Field label="Title Line 2 (EN)" value={C.hero.titleBottomEn} onChange={(v) => edit((c) => (c.hero.titleBottomEn = v))} />
+                </div>
+                <Area label="Subtitle (EN)" value={C.hero.subtitleEn} onChange={(v) => edit((c) => (c.hero.subtitleEn = v))} rows={2} />
+                <div className="grid-2">
+                  <Field label="Primary Button (EN)" value={C.hero.ctaPrimaryEn} onChange={(v) => edit((c) => (c.hero.ctaPrimaryEn = v))} />
+                  <Field label="Secondary Button (EN)" value={C.hero.ctaSecondaryEn} onChange={(v) => edit((c) => (c.hero.ctaSecondaryEn = v))} />
+                </div>
               </div>
             </div>
           )}
@@ -594,18 +608,19 @@ export default function AdminApp({ initialContent, initialMessages }) {
                 <p>Teks yang berjalan di bawah hero — nilai-nilai & semangat camp.</p>
               </div>
               <div className="box">
+                <div className="box-title">Bahasa Indonesia</div>
                 <div className="fld">
-                  <label>Daftar Nilai</label>
-                  <TagEditor
-                    values={C.values || []}
-                    onChange={(arr) => edit((c) => (c.values = arr))}
-                  />
-                  <div className="hint">Ketik lalu Enter untuk menambah nilai baru. Klik × untuk menghapus.</div>
+                  <label>Daftar Nilai (ID)</label>
+                  <TagEditor values={C.values || []} onChange={(arr) => edit((c) => (c.values = arr))} />
+                  <div className="hint">Ketik lalu Enter untuk menambah. Klik × untuk menghapus.</div>
                 </div>
-                <div className="values-preview">
-                  {(C.values || []).map((v, i) => (
-                    <span key={i} className="values-chip">{v}</span>
-                  ))}
+              </div>
+              <div className="box">
+                <div className="box-title">English Version (EN)</div>
+                <div className="fld">
+                  <label>Values List (EN)</label>
+                  <TagEditor values={C.valuesEn || []} onChange={(arr) => edit((c) => (c.valuesEn = arr))} />
+                  <div className="hint">English translation of the values above. Leave empty to use Indonesian.</div>
                 </div>
               </div>
             </div>
@@ -616,10 +631,17 @@ export default function AdminApp({ initialContent, initialMessages }) {
             <div className="panel active">
               <div className="panel-intro"><h3>Tentang Kami</h3><p>Cerita & angka-angka penting tentang camp.</p></div>
               <div className="box">
+                <div className="box-title">Bahasa Indonesia</div>
                 <Field label="Judul" value={C.about.heading} onChange={(v) => edit((c) => (c.about.heading = v))} />
                 <Area label="Kalimat Pembuka" value={C.about.lead} onChange={(v) => edit((c) => (c.about.lead = v))} rows={2} />
                 <Area label="Deskripsi" value={C.about.body} onChange={(v) => edit((c) => (c.about.body = v))} rows={4} />
                 <ImageField label="Foto" value={C.about.image} onChange={(v) => edit((c) => (c.about.image = v))} />
+              </div>
+              <div className="box">
+                <div className="box-title">English Version (EN)</div>
+                <Field label="Heading (EN)" value={C.about.headingEn} onChange={(v) => edit((c) => (c.about.headingEn = v))} />
+                <Area label="Opening (EN)" value={C.about.leadEn} onChange={(v) => edit((c) => (c.about.leadEn = v))} rows={2} />
+                <Area label="Description (EN)" value={C.about.bodyEn} onChange={(v) => edit((c) => (c.about.bodyEn = v))} rows={4} />
               </div>
               <div className="box">
                 <div className="box-title">Statistik</div>
@@ -631,11 +653,12 @@ export default function AdminApp({ initialContent, initialMessages }) {
                     </div>
                     <div className="grid-2">
                       <Field label="Angka" value={s.value} onChange={(v) => edit((c) => (c.about.stats[i].value = v))} />
-                      <Field label="Keterangan" value={s.label} onChange={(v) => edit((c) => (c.about.stats[i].label = v))} />
+                      <Field label="Keterangan (ID)" value={s.label} onChange={(v) => edit((c) => (c.about.stats[i].label = v))} />
                     </div>
+                    <Field label="Label (EN)" value={s.labelEn} onChange={(v) => edit((c) => (c.about.stats[i].labelEn = v))} />
                   </div>
                 ))}
-                <AddBtn label="Tambah Statistik" onClick={() => edit((c) => c.about.stats.push({ value: "0", label: "Keterangan" }))} />
+                <AddBtn label="Tambah Statistik" onClick={() => edit((c) => c.about.stats.push({ value: "0", label: "Keterangan", labelEn: "" }))} />
               </div>
             </div>
           )}
@@ -647,14 +670,19 @@ export default function AdminApp({ initialContent, initialMessages }) {
               {C.programs.map((p, i) => (
                 <ItemCard key={p.id || i} tag={p.name || "Program"} onUp={() => move("programs", i, -1)} onDown={() => move("programs", i, 1)} onDelete={() => edit((c) => c.programs.splice(i, 1))}>
                   <div className="grid-2">
-                    <Field label="Nama Program" value={p.name} onChange={(v) => edit((c) => (c.programs[i].name = v))} />
-                    <Field label="Level / Badge" value={p.level} onChange={(v) => edit((c) => (c.programs[i].level = v))} />
+                    <Field label="Nama Program (ID)" value={p.name} onChange={(v) => edit((c) => (c.programs[i].name = v))} />
+                    <Field label="Level (ID)" value={p.level} onChange={(v) => edit((c) => (c.programs[i].level = v))} />
                   </div>
                   <SelectField label="Ikon" value={p.icon} options={ICON_OPTIONS} onChange={(v) => edit((c) => (c.programs[i].icon = v))} />
-                  <Area label="Deskripsi" value={p.desc} onChange={(v) => edit((c) => (c.programs[i].desc = v))} rows={2} />
+                  <Area label="Deskripsi (ID)" value={p.desc} onChange={(v) => edit((c) => (c.programs[i].desc = v))} rows={2} />
+                  <div className="grid-2">
+                    <Field label="Name (EN)" value={p.nameEn} onChange={(v) => edit((c) => (c.programs[i].nameEn = v))} />
+                    <Field label="Level (EN)" value={p.levelEn} onChange={(v) => edit((c) => (c.programs[i].levelEn = v))} />
+                  </div>
+                  <Area label="Description (EN)" value={p.descEn} onChange={(v) => edit((c) => (c.programs[i].descEn = v))} rows={2} />
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Program" onClick={() => edit((c) => c.programs.push({ id: "p" + Date.now(), icon: "boxing", name: "Program Baru", level: "Semua Level", desc: "" }))} />
+              <AddBtn label="Tambah Program" onClick={() => edit((c) => c.programs.push({ id: "p" + Date.now(), icon: "boxing", name: "Program Baru", nameEn: "", level: "Semua Level", levelEn: "", desc: "", descEn: "" }))} />
             </div>
           )}
 
@@ -665,16 +693,24 @@ export default function AdminApp({ initialContent, initialMessages }) {
               {C.coaches.map((co, i) => (
                 <ItemCard key={co.id || i} tag={co.name || "Coach"} onUp={() => move("coaches", i, -1)} onDown={() => move("coaches", i, 1)} onDelete={() => edit((c) => c.coaches.splice(i, 1))}>
                   <Field label="Nama" value={co.name} onChange={(v) => edit((c) => (c.coaches[i].name = v))} />
-                  <Field label="Jabatan / Spesialisasi" value={co.role} onChange={(v) => edit((c) => (c.coaches[i].role = v))} />
+                  <div className="grid-2">
+                    <Field label="Jabatan (ID)" value={co.role} onChange={(v) => edit((c) => (c.coaches[i].role = v))} />
+                    <Field label="Role (EN)" value={co.roleEn} onChange={(v) => edit((c) => (c.coaches[i].roleEn = v))} />
+                  </div>
                   <ImageField label="Foto" value={co.image} onChange={(v) => edit((c) => (c.coaches[i].image = v))} />
-                  <Area label="Bio Singkat" value={co.bio} onChange={(v) => edit((c) => (c.coaches[i].bio = v))} rows={3} />
-                  <div className="fld" style={{ marginBottom: 0 }}>
-                    <label>Keahlian (tag)</label>
+                  <Area label="Bio (ID)" value={co.bio} onChange={(v) => edit((c) => (c.coaches[i].bio = v))} rows={3} />
+                  <Area label="Bio (EN)" value={co.bioEn} onChange={(v) => edit((c) => (c.coaches[i].bioEn = v))} rows={3} />
+                  <div className="fld">
+                    <label>Keahlian (ID)</label>
                     <TagEditor values={co.specialties} onChange={(arr) => edit((c) => (c.coaches[i].specialties = arr))} />
+                  </div>
+                  <div className="fld" style={{ marginBottom: 0 }}>
+                    <label>Specialties (EN)</label>
+                    <TagEditor values={co.specialtiesEn || []} onChange={(arr) => edit((c) => (c.coaches[i].specialtiesEn = arr))} />
                   </div>
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Coach" onClick={() => edit((c) => c.coaches.push({ id: "c" + Date.now(), name: "Coach Baru", role: "", image: "", bio: "", specialties: [] }))} />
+              <AddBtn label="Tambah Coach" onClick={() => edit((c) => c.coaches.push({ id: "c" + Date.now(), name: "Coach Baru", role: "", roleEn: "", image: "", bio: "", bioEn: "", specialties: [], specialtiesEn: [] }))} />
             </div>
           )}
 
@@ -714,22 +750,31 @@ export default function AdminApp({ initialContent, initialMessages }) {
               {C.pricing.map((p, i) => (
                 <ItemCard key={p.id || i} tag={p.name || "Paket"} onUp={() => move("pricing", i, -1)} onDown={() => move("pricing", i, 1)} onDelete={() => edit((c) => c.pricing.splice(i, 1))}>
                   <div className="grid-2">
-                    <Field label="Nama Paket" value={p.name} onChange={(v) => edit((c) => (c.pricing[i].name = v))} />
-                    <Field label="Harga (tanpa Rp)" value={p.price} onChange={(v) => edit((c) => (c.pricing[i].price = v))} hint="contoh: 300.000" />
+                    <Field label="Nama Paket (ID)" value={p.name} onChange={(v) => edit((c) => (c.pricing[i].name = v))} />
+                    <Field label="Name (EN)" value={p.nameEn} onChange={(v) => edit((c) => (c.pricing[i].nameEn = v))} />
                   </div>
                   <div className="grid-2">
+                    <Field label="Harga (tanpa Rp)" value={p.price} onChange={(v) => edit((c) => (c.pricing[i].price = v))} hint="contoh: 300.000" />
                     <Field label="Periode" value={p.period} onChange={(v) => edit((c) => (c.pricing[i].period = v))} hint="contoh: / bulan" />
-                    <Field label="Teks Tombol" value={p.cta} onChange={(v) => edit((c) => (c.pricing[i].cta = v))} />
+                  </div>
+                  <div className="grid-2">
+                    <Field label="Teks Tombol (ID)" value={p.cta} onChange={(v) => edit((c) => (c.pricing[i].cta = v))} />
+                    <Field label="Button Text (EN)" value={p.ctaEn} onChange={(v) => edit((c) => (c.pricing[i].ctaEn = v))} />
                   </div>
                   <CheckField label="Tandai sebagai paket Paling Favorit" checked={p.popular} onChange={(v) => edit((c) => (c.pricing[i].popular = v))} />
-                  <Area label="Deskripsi singkat" value={p.desc} onChange={(v) => edit((c) => (c.pricing[i].desc = v))} rows={2} />
-                  <div className="fld" style={{ marginBottom: 0 }}>
-                    <label>Fitur / Benefit (tag)</label>
+                  <Area label="Deskripsi (ID)" value={p.desc} onChange={(v) => edit((c) => (c.pricing[i].desc = v))} rows={2} />
+                  <Area label="Description (EN)" value={p.descEn} onChange={(v) => edit((c) => (c.pricing[i].descEn = v))} rows={2} />
+                  <div className="fld">
+                    <label>Fitur / Benefit (ID)</label>
                     <TagEditor values={p.features} onChange={(arr) => edit((c) => (c.pricing[i].features = arr))} />
+                  </div>
+                  <div className="fld" style={{ marginBottom: 0 }}>
+                    <label>Features (EN)</label>
+                    <TagEditor values={p.featuresEn || []} onChange={(arr) => edit((c) => (c.pricing[i].featuresEn = arr))} />
                   </div>
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Paket" onClick={() => edit((c) => c.pricing.push({ id: "h" + Date.now(), name: "Paket Baru", price: "0", period: "/ bulan", popular: false, desc: "", features: [], cta: "Pilih Paket" }))} />
+              <AddBtn label="Tambah Paket" onClick={() => edit((c) => c.pricing.push({ id: "h" + Date.now(), name: "Paket Baru", nameEn: "", price: "0", period: "/ bulan", popular: false, desc: "", descEn: "", features: [], featuresEn: [], cta: "Pilih Paket", ctaEn: "" }))} />
             </div>
           )}
 
@@ -741,13 +786,15 @@ export default function AdminApp({ initialContent, initialMessages }) {
                 <ItemCard key={t.id || i} tag={t.name || "Testimoni"} onUp={() => move("testimonials", i, -1)} onDown={() => move("testimonials", i, 1)} onDelete={() => edit((c) => c.testimonials.splice(i, 1))}>
                   <div className="grid-2">
                     <Field label="Nama" value={t.name} onChange={(v) => edit((c) => (c.testimonials[i].name = v))} />
-                    <Field label="Keterangan (mis. Member Group)" value={t.role} onChange={(v) => edit((c) => (c.testimonials[i].role = v))} />
+                    <Field label="Keterangan (ID)" value={t.role} onChange={(v) => edit((c) => (c.testimonials[i].role = v))} />
                   </div>
+                  <Field label="Role (EN)" value={t.roleEn} onChange={(v) => edit((c) => (c.testimonials[i].roleEn = v))} />
                   <SelectField label="Rating Bintang" value={String(t.rating || 5)} options={[5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: n + " Bintang" }))} onChange={(v) => edit((c) => (c.testimonials[i].rating = parseInt(v, 10)))} />
-                  <Area label="Isi Testimoni" value={t.quote} onChange={(v) => edit((c) => (c.testimonials[i].quote = v))} rows={3} />
+                  <Area label="Isi Testimoni (ID)" value={t.quote} onChange={(v) => edit((c) => (c.testimonials[i].quote = v))} rows={3} />
+                  <Area label="Testimonial (EN)" value={t.quoteEn} onChange={(v) => edit((c) => (c.testimonials[i].quoteEn = v))} rows={3} />
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Testimoni" onClick={() => edit((c) => c.testimonials.push({ id: "t" + Date.now(), name: "Nama Member", role: "Member", rating: 5, quote: "" }))} />
+              <AddBtn label="Tambah Testimoni" onClick={() => edit((c) => c.testimonials.push({ id: "t" + Date.now(), name: "Nama Member", role: "Member", roleEn: "", rating: 5, quote: "", quoteEn: "" }))} />
             </div>
           )}
 
@@ -757,11 +804,13 @@ export default function AdminApp({ initialContent, initialMessages }) {
               <div className="panel-intro"><h3>FAQ</h3><p>Pertanyaan yang sering ditanyakan calon member.</p></div>
               {C.faq.map((f, i) => (
                 <ItemCard key={i} tag={"Pertanyaan " + (i + 1)} onUp={() => move("faq", i, -1)} onDown={() => move("faq", i, 1)} onDelete={() => edit((c) => c.faq.splice(i, 1))}>
-                  <Field label="Pertanyaan" value={f.q} onChange={(v) => edit((c) => (c.faq[i].q = v))} />
-                  <Area label="Jawaban" value={f.a} onChange={(v) => edit((c) => (c.faq[i].a = v))} rows={3} />
+                  <Field label="Pertanyaan (ID)" value={f.q} onChange={(v) => edit((c) => (c.faq[i].q = v))} />
+                  <Area label="Jawaban (ID)" value={f.a} onChange={(v) => edit((c) => (c.faq[i].a = v))} rows={3} />
+                  <Field label="Question (EN)" value={f.qEn} onChange={(v) => edit((c) => (c.faq[i].qEn = v))} />
+                  <Area label="Answer (EN)" value={f.aEn} onChange={(v) => edit((c) => (c.faq[i].aEn = v))} rows={3} />
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Pertanyaan" onClick={() => edit((c) => c.faq.push({ q: "Pertanyaan baru?", a: "" }))} />
+              <AddBtn label="Tambah Pertanyaan" onClick={() => edit((c) => c.faq.push({ q: "Pertanyaan baru?", a: "", qEn: "", aEn: "" }))} />
             </div>
           )}
 
@@ -772,10 +821,13 @@ export default function AdminApp({ initialContent, initialMessages }) {
               {C.gallery.map((g, i) => (
                 <ItemCard key={i} tag={"Foto " + (i + 1)} onUp={() => move("gallery", i, -1)} onDown={() => move("gallery", i, 1)} onDelete={() => edit((c) => c.gallery.splice(i, 1))}>
                   <ImageField label="Gambar" value={g.image} onChange={(v) => edit((c) => (c.gallery[i].image = v))} />
-                  <Field label="Caption" value={g.caption} onChange={(v) => edit((c) => (c.gallery[i].caption = v))} />
+                  <div className="grid-2">
+                    <Field label="Caption (ID)" value={g.caption} onChange={(v) => edit((c) => (c.gallery[i].caption = v))} />
+                    <Field label="Caption (EN)" value={g.captionEn} onChange={(v) => edit((c) => (c.gallery[i].captionEn = v))} />
+                  </div>
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Foto" onClick={() => edit((c) => c.gallery.push({ image: "", caption: "Caption foto" }))} />
+              <AddBtn label="Tambah Foto" onClick={() => edit((c) => c.gallery.push({ image: "", caption: "Caption foto", captionEn: "" }))} />
             </div>
           )}
 
@@ -787,11 +839,12 @@ export default function AdminApp({ initialContent, initialMessages }) {
                 <ItemCard key={p.id || i} tag={p.name || "Mitra " + (i + 1)} onUp={() => move("partners", i, -1)} onDown={() => move("partners", i, 1)} onDelete={() => edit((c) => c.partners.splice(i, 1))}>
                   <ImageField label="Logo Mitra" value={p.logo} onChange={(v) => edit((c) => (c.partners[i].logo = v))} />
                   <Field label="Nama Mitra" value={p.name} onChange={(v) => edit((c) => (c.partners[i].name = v))} />
-                  <Area label="Deskripsi Singkat" value={p.desc} onChange={(v) => edit((c) => (c.partners[i].desc = v))} rows={2} placeholder="Penjelasan singkat tentang mitra ini..." />
+                  <Area label="Deskripsi (ID)" value={p.desc} onChange={(v) => edit((c) => (c.partners[i].desc = v))} rows={2} placeholder="Penjelasan singkat tentang mitra ini..." />
+                  <Area label="Description (EN)" value={p.descEn} onChange={(v) => edit((c) => (c.partners[i].descEn = v))} rows={2} placeholder="Brief description about this partner..." />
                   <Field label="Website (opsional)" value={p.website} onChange={(v) => edit((c) => (c.partners[i].website = v))} placeholder="https://contoh.com" hint="Kosongkan jika tidak punya website. Jika diisi, akan muncul tombol 'Kunjungi Website'." />
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Mitra" onClick={() => edit((c) => { if (!c.partners) c.partners = []; c.partners.push({ id: "m" + Date.now(), name: "Nama Mitra", logo: "", desc: "", website: "" }); })} />
+              <AddBtn label="Tambah Mitra" onClick={() => edit((c) => { if (!c.partners) c.partners = []; c.partners.push({ id: "m" + Date.now(), name: "Nama Mitra", logo: "", desc: "", descEn: "", website: "" }); })} />
             </div>
           )}
 
@@ -802,8 +855,14 @@ export default function AdminApp({ initialContent, initialMessages }) {
               <div className="box">
                 <Field label="Nomor Telepon (tampil)" value={C.contact.phone} onChange={(v) => edit((c) => (c.contact.phone = v))} hint="contoh: 0895-2437-8203" />
                 <Field label="Nomor WhatsApp (format 62...)" value={C.contact.whatsapp} onChange={(v) => edit((c) => (c.contact.whatsapp = v))} hint="contoh: 6289524378203 (tanpa + atau spasi)" />
-                <Field label="Alamat / Lokasi" value={C.contact.address} onChange={(v) => edit((c) => (c.contact.address = v))} />
-                <Field label="Jam Buka" value={C.contact.hoursWeekday} onChange={(v) => edit((c) => (c.contact.hoursWeekday = v))} />
+                <div className="grid-2">
+                  <Field label="Alamat / Lokasi (ID)" value={C.contact.address} onChange={(v) => edit((c) => (c.contact.address = v))} />
+                  <Field label="Address (EN)" value={C.contact.addressEn} onChange={(v) => edit((c) => (c.contact.addressEn = v))} />
+                </div>
+                <div className="grid-2">
+                  <Field label="Jam Buka (ID)" value={C.contact.hoursWeekday} onChange={(v) => edit((c) => (c.contact.hoursWeekday = v))} />
+                  <Field label="Operating Hours (EN)" value={C.contact.hoursWeekdayEn} onChange={(v) => edit((c) => (c.contact.hoursWeekdayEn = v))} />
+                </div>
                 <Field label="Catatan Jam (opsional)" value={C.contact.hoursWeekend} onChange={(v) => edit((c) => (c.contact.hoursWeekend = v))} />
                 <Field label="Email (opsional)" value={C.contact.email} onChange={(v) => edit((c) => (c.contact.email = v))} />
               </div>

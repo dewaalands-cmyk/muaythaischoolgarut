@@ -32,6 +32,8 @@ function PageInner({ content: c }) {
   const tel = (c.contact.phone || "").replace(/[^0-9+]/g, "");
   const socials = buildSocials(c.contact);
   const year = new Date().getFullYear();
+  // Helper: return EN value if lang=en and EN is non-empty, otherwise ID
+  const g = (en, id) => (lang === "en" && en) ? en : id;
 
   return (
     <>
@@ -41,17 +43,17 @@ function PageInner({ content: c }) {
       <section className="hero" id="hero">
         <div className="hero-bg"><img src={c.hero.bgImage} alt="" /></div>
         <div className="container hero-inner">
-          <span className="hero-badge"><span className="dot" />{c.hero.badge}</span>
+          <span className="hero-badge"><span className="dot" />{g(c.hero.badgeEn, c.hero.badge)}</span>
           <h1>
-            <span className="stroke">{c.hero.titleTop}</span>
-            <span className="solid">{c.hero.titleBottom}</span>
+            <span className="stroke">{g(c.hero.titleTopEn, c.hero.titleTop)}</span>
+            <span className="solid">{g(c.hero.titleBottomEn, c.hero.titleBottom)}</span>
           </h1>
-          <p className="hero-sub">{c.hero.subtitle}</p>
+          <p className="hero-sub">{g(c.hero.subtitleEn, c.hero.subtitle)}</p>
           <div className="hero-actions">
             <a className="btn btn-primary btn-lg" href="#kontak">
-              <Icon name="whatsapp" /> <span>{c.hero.ctaPrimary}</span>
+              <Icon name="whatsapp" /> <span>{g(c.hero.ctaPrimaryEn, c.hero.ctaPrimary)}</span>
             </a>
-            <a className="btn btn-outline btn-lg" href="#program"><span>{c.hero.ctaSecondary}</span></a>
+            <a className="btn btn-outline btn-lg" href="#program"><span>{g(c.hero.ctaSecondaryEn, c.hero.ctaSecondary)}</span></a>
           </div>
         </div>
         <div className="scroll-cue"><div className="mouse" /><span>{t.hero.scroll}</span></div>
@@ -61,7 +63,7 @@ function PageInner({ content: c }) {
       <div className="values">
         <div className="container">
           <div className="values-track">
-            {c.values.map((v, i) => <span key={i} className="values-item">{v}</span>)}
+            {(lang === "en" && c.valuesEn?.length ? c.valuesEn : c.values).map((v, i) => <span key={i} className="values-item">{v}</span>)}
           </div>
         </div>
       </div>
@@ -79,12 +81,12 @@ function PageInner({ content: c }) {
             </div>
             <div className="about-body reveal d1">
               <span className="eyebrow">{t.about.eyebrow}</span>
-              <h2 className="section-title">{c.about.heading}</h2>
-              <p className="lead">{c.about.lead}</p>
-              <p>{c.about.body}</p>
+              <h2 className="section-title">{g(c.about.headingEn, c.about.heading)}</h2>
+              <p className="lead">{g(c.about.leadEn, c.about.lead)}</p>
+              <p>{g(c.about.bodyEn, c.about.body)}</p>
               <div className="stats">
                 {c.about.stats.map((s, i) => (
-                  <div key={i} className="stat"><div className="v">{s.value}</div><div className="l">{s.label}</div></div>
+                  <div key={i} className="stat"><div className="v">{s.value}</div><div className="l">{g(s.labelEn, s.label)}</div></div>
                 ))}
               </div>
             </div>
@@ -104,9 +106,9 @@ function PageInner({ content: c }) {
             {c.programs.map((p) => (
               <article key={p.id} className="card reveal">
                 <div className="prog-icon"><Icon name={p.icon} /></div>
-                <span className="prog-level">{p.level}</span>
-                <h3>{p.name}</h3>
-                <p>{p.desc}</p>
+                <span className="prog-level">{g(p.levelEn, p.level)}</span>
+                <h3>{g(p.nameEn, p.name)}</h3>
+                <p>{g(p.descEn, p.desc)}</p>
               </article>
             ))}
           </div>
@@ -125,16 +127,16 @@ function PageInner({ content: c }) {
             {c.coaches.map((co) => (
               <article key={co.id} className="coach-card reveal">
                 <div className="coach-photo">
-                  <img src={co.image} alt={`${co.name} - ${co.role}`} loading="lazy" />
+                  <img src={co.image} alt={`${co.name} - ${g(co.roleEn, co.role)}`} loading="lazy" />
                   <div className="coach-name-wrap">
-                    <div className="role">{co.role}</div>
+                    <div className="role">{g(co.roleEn, co.role)}</div>
                     <h3>{co.name}</h3>
                   </div>
                 </div>
                 <div className="coach-info">
-                  <p>{co.bio}</p>
+                  <p>{g(co.bioEn, co.bio)}</p>
                   <div className="coach-tags">
-                    {(co.specialties || []).map((tag, i) => <span key={i}>{tag}</span>)}
+                    {(lang === "en" && co.specialtiesEn?.length ? co.specialtiesEn : (co.specialties || [])).map((tag, i) => <span key={i}>{tag}</span>)}
                   </div>
                 </div>
               </article>
@@ -154,7 +156,7 @@ function PageInner({ content: c }) {
           <div className="sched-grid">
             {c.schedule.map((d, i) => (
               <div key={i} className="sched-day">
-                <div className="day-head">{d.day}</div>
+                <div className="day-head">{g(d.dayEn, d.day)}</div>
                 <div className="sessions">
                   {d.sessions && d.sessions.length ? (
                     d.sessions.map((s, j) => (
@@ -186,25 +188,25 @@ function PageInner({ content: c }) {
             {c.pricing.map((p) => (
               <div key={p.id} className={"price-card" + (p.popular ? " popular" : "")}>
                 {p.popular && <div className="price-badge">{t.pricing.popular}</div>}
-                <h3>{p.name}</h3>
-                <p className="desc">{p.desc}</p>
+                <h3>{g(p.nameEn, p.name)}</h3>
+                <p className="desc">{g(p.descEn, p.desc)}</p>
                 <div className="price-amount">
                   <span className="rp">Rp</span>
                   <span className="num">{p.price}</span>
                   <span className="per">{p.period}</span>
                 </div>
                 <ul className="price-feats">
-                  {(p.features || []).map((f, i) => (
+                  {(lang === "en" && p.featuresEn?.length ? p.featuresEn : (p.features || [])).map((f, i) => (
                     <li key={i}><Icon name="check" strokeWidth={2.5} /><span>{f}</span></li>
                   ))}
                 </ul>
                 <a
                   className={"btn " + (p.popular ? "btn-primary" : "btn-outline") + " btn-block"}
-                  href={waLink(c.contact.whatsapp, t.pricing.waMsg(p.name))}
+                  href={waLink(c.contact.whatsapp, t.pricing.waMsg(g(p.nameEn, p.name)))}
                   target="_blank"
                   rel="noopener"
                 >
-                  {p.cta || t.pricing.defaultCta}
+                  {g(p.ctaEn, p.cta) || t.pricing.defaultCta}
                 </a>
               </div>
             ))}
@@ -226,12 +228,12 @@ function PageInner({ content: c }) {
                 <div className="stars">
                   {Array.from({ length: item.rating || 5 }).map((_, i) => <Icon key={i} name="star" />)}
                 </div>
-                <blockquote>{item.quote}</blockquote>
+                <blockquote>{g(item.quoteEn, item.quote)}</blockquote>
                 <figcaption className="who">
                   <div className="av">{(item.name || "?").charAt(0).toUpperCase()}</div>
                   <div>
                     <div className="nm">{item.name}</div>
-                    <div className="rl">{item.role}</div>
+                    <div className="rl">{g(item.roleEn, item.role)}</div>
                   </div>
                 </figcaption>
               </figure>
@@ -249,10 +251,10 @@ function PageInner({ content: c }) {
             <p className="section-sub">{t.gallery.sub}</p>
           </div>
           <div className="gallery-scroll">
-            {c.gallery.map((g, i) => (
+            {c.gallery.map((item, i) => (
               <div key={i} className="gallery-item">
-                <img src={g.image} alt={g.caption} loading="lazy" />
-                <div className="cap">{g.caption}</div>
+                <img src={item.image} alt={g(item.captionEn, item.caption)} loading="lazy" />
+                <div className="cap">{g(item.captionEn, item.caption)}</div>
               </div>
             ))}
           </div>
@@ -266,7 +268,7 @@ function PageInner({ content: c }) {
             <span className="eyebrow">{t.faq.eyebrow}</span>
             <h2 className="section-title">{t.faq.title} <span className="hl">{t.faq.titleHl}</span></h2>
           </div>
-          <Faq items={c.faq} />
+          <Faq items={c.faq.map(f => ({ q: g(f.qEn, f.q), a: g(f.aEn, f.a) }))} />
         </div>
       </section>
 
@@ -291,7 +293,7 @@ function PageInner({ content: c }) {
             <div className="contact-info reveal">
               <div className="info-row">
                 <div className="ic"><Icon name="pin" /></div>
-                <div><div className="lbl">{t.contact.location}</div><div className="val">{c.contact.address}</div></div>
+                <div><div className="lbl">{t.contact.location}</div><div className="val">{g(c.contact.addressEn, c.contact.address)}</div></div>
               </div>
               {c.contact.mapsEmbed && c.contact.mapsEmbed.includes("google.com/maps") && (
                 <div className="map-embed">
@@ -321,7 +323,7 @@ function PageInner({ content: c }) {
                   {p.logo && <img src={p.logo} alt={p.name} className="partner-logo" />}
                   <div className="partner-info">
                     <h3 className="partner-name">{p.name}</h3>
-                    {p.desc && <p className="partner-desc">{p.desc}</p>}
+                    {(g(p.descEn, p.desc)) && <p className="partner-desc">{g(p.descEn, p.desc)}</p>}
                     {p.website && (
                       <a href={p.website} target="_blank" rel="noopener noreferrer" className="partner-link">
                         {t.partners.visit} <Icon name="external" size={14} />
