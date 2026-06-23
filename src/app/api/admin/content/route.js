@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken, SESSION_COOKIE } from "@/lib/auth";
 import { getSiteContent, saveSiteContent } from "@/lib/content";
+import { autoTranslateContent } from "@/lib/translate";
 
 async function checkAuth() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
@@ -34,7 +35,25 @@ export async function PUT(request) {
     if (data.contact?.mapsEmbed) {
       data.contact.mapsEmbed = await fixMapsUrl(data.contact.mapsEmbed);
     }
-    await saveSiteContent(data);
+
+    // Auto-generate English translations so the admin only writes Indonesian.
+    // If translation is slow/unavailable, save the Indonesian data anyway —
+    // the website falls back to Indonesian for any missing English field.
+    let toSave = data;
+    try {
+      toSave = await Promise.race([
+        autoTranslateContent(data),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("translate timeout")), 8000)),
+      ]);
+      toSave._enGenerated = true;
+    } catch (e) {
+      console.error("[content PUT] auto-translate skipped:", e?.message || e);
+      toSave = data;
+      // Biarkan _enGenerated kosong supaya read-path mencoba menerjemahkan lagi.
+      delete toSave._enGenerated;
+    }
+
+    await saveSiteContent(toSave);
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[content PUT]", e);

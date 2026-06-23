@@ -1,6 +1,7 @@
 // Helper baca/tulis isi website ke database.
 import { prisma } from "./prisma";
 import { defaultContent } from "./defaultContent";
+import { autoTranslateContent } from "./translate";
 
 function isObject(v) {
   return v && typeof v === "object" && !Array.isArray(v);
@@ -33,7 +34,26 @@ export function mergeDeep(base, override) {
 export async function getSiteContent() {
   try {
     const row = await prisma.siteContent.findUnique({ where: { id: 1 } });
-    if (row && row.data) return mergeDeep(defaultContent, row.data);
+    if (row && row.data) {
+      const content = mergeDeep(defaultContent, row.data);
+      // Konten lama yang belum punya terjemahan EN: terjemahkan otomatis
+      // sekali, simpan ke DB, lalu pakai. Pemuatan berikutnya sudah ter-cache.
+      if (!content._enGenerated) {
+        try {
+          const translated = await Promise.race([
+            autoTranslateContent(content),
+            new Promise((_, rej) => setTimeout(() => rej(new Error("translate timeout")), 9000)),
+          ]);
+          translated._enGenerated = true;
+          await saveSiteContent(translated);
+          return translated;
+        } catch (e) {
+          // Terjemahan gagal/lambat -> tampilkan apa adanya (fallback ID).
+          return content;
+        }
+      }
+      return content;
+    }
   } catch (e) {
     // DB belum siap (mis. belum migrate) -> jangan crash, pakai default.
   }
