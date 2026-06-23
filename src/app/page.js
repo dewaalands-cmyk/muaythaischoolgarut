@@ -53,7 +53,7 @@ export default async function Home() {
       {/* ============ HERO ============ */}
       <section className="hero" id="hero">
         <div className="hero-bg">
-          <img src={c.hero.bgImage} alt="Area latihan Camp 3GRT Muaythai School Garut" />
+          <img src={c.hero.bgImage} alt="" />
         </div>
         <div className="container hero-inner">
           <span className="hero-badge"><span className="dot" />{c.hero.badge}</span>
