@@ -719,7 +719,7 @@ export default function AdminApp({ initialContent, initialMessages }) {
                     </div>
                     {m.message && <div className="body">{m.message}</div>}
                     <div className="acts">
-                      <a className="btn btn-primary btn-sm" href={waLink(C.contact.whatsapp, `Halo ${m.name}, terima kasih sudah daftar di Camp 3GRT untuk program ${m.program}.`)} target="_blank" rel="noopener">Chat WhatsApp</a>
+                      <a className="btn btn-primary btn-sm" href={waLink(m.phone, `Halo ${m.name}, terima kasih sudah daftar di Camp 3GRT untuk program ${m.program}.`)} target="_blank" rel="noopener">Chat WhatsApp</a>
                       <button className="btn btn-ghost btn-sm" onClick={() => setRead(m.id, !m.read)}>{m.read ? "Tandai belum dibaca" : "Tandai dibaca"}</button>
                       <button className="btn btn-danger btn-sm" onClick={() => delMsg(m.id)}>Hapus</button>
                     </div>
