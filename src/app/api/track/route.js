@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { wibDay } from "@/lib/day";
+import { ensurePageViewTable } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export async function POST(request) {
         path: "/",
       });
     }
+    await ensurePageViewTable();
     const day = wibDay();
     await prisma.pageView.upsert({
       where: { day_visitor: { day, visitor: vid } },

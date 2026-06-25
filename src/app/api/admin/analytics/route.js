@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { verifyToken, SESSION_COOKIE } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { wibDay, ymd } from "@/lib/day";
+import { ensurePageViewTable } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
+    await ensurePageViewTable();
     const rows = await prisma.pageView.groupBy({
       by: ["day"],
       _count: { _all: true },

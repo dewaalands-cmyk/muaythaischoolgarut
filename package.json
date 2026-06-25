@@ -5,7 +5,7 @@
   "description": "Camp 3GRT - Muaythai School Garut. Website + CMS (Next.js + Prisma + PostgreSQL). by Pagiverse Studio.",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && (prisma db push --skip-generate || true) && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
