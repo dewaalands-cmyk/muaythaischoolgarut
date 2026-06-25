@@ -2,11 +2,15 @@
 // Jalankan: npm run db:seed
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const { defaultContent } = require("../src/lib/defaultContent");
 
 const prisma = new PrismaClient();
 
-const DEFAULT_PASSWORD = "admin3grt";
+// Jangan pakai password default yang diketahui publik. Ambil dari env
+// ADMIN_PASSWORD, atau buat acak (ditampilkan sekali di console saat seed).
+const DEFAULT_PASSWORD =
+  process.env.ADMIN_PASSWORD || "3grt-" + crypto.randomBytes(9).toString("base64url");
 
 async function main() {
   // 1. Isi konten website (kalau belum ada)
