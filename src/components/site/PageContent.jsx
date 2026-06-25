@@ -291,10 +291,12 @@ function PageInner({ content: c }) {
           </div>
           <div className="contact-grid">
             <div className="contact-info reveal">
-              <div className="info-row">
-                <div className="ic"><Icon name="pin" /></div>
-                <div><div className="lbl">{t.contact.location}</div><div className="val">{g(c.contact.addressEn, c.contact.address)}</div></div>
-              </div>
+              {g(c.contact.addressEn, c.contact.address) && (
+                <div className="info-row">
+                  <div className="ic"><Icon name="pin" /></div>
+                  <div><div className="lbl">{t.contact.location}</div><div className="val">{g(c.contact.addressEn, c.contact.address)}</div></div>
+                </div>
+              )}
               {c.contact.mapsEmbed && c.contact.mapsEmbed.includes("google.com/maps") && (
                 <div className="map-embed">
                   <iframe src={c.contact.mapsEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title={t.contact.mapTitle} allowFullScreen />
@@ -370,9 +372,9 @@ function PageInner({ content: c }) {
             </div>
             <div>
               <h4>{t.footer.contactHeader}</h4>
-              <a className="fcontact" href={"tel:" + tel}>{c.contact.phone}</a>
-              <span className="fcontact">{c.contact.address}</span>
-              <span className="fcontact">{c.contact.hoursWeekday}</span>
+              {c.contact.phone && <a className="fcontact" href={"tel:" + tel}>{c.contact.phone}</a>}
+              {g(c.contact.addressEn, c.contact.address) && <span className="fcontact">{g(c.contact.addressEn, c.contact.address)}</span>}
+              {g(c.contact.hoursWeekdayEn, c.contact.hoursWeekday) && <span className="fcontact">{g(c.contact.hoursWeekdayEn, c.contact.hoursWeekday)}</span>}
             </div>
           </div>
           {socials.length > 0 && (

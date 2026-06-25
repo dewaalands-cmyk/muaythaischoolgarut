@@ -80,6 +80,28 @@ const ICON_OPTIONS = [
 
 /* ============== HELPER ============== */
 const clone = (o) => JSON.parse(JSON.stringify(o));
+
+// Bunyi "ding" pendek tanpa file audio (Web Audio API).
+function playBeep() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(1175, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.46);
+    setTimeout(() => ctx.close(), 700);
+  } catch {}
+}
 function timeAgo(iso) {
   const d = new Date(iso);
   const s = Math.floor((Date.now() - d.getTime()) / 1000);
@@ -316,6 +338,9 @@ export default function AdminApp({ initialContent, initialMessages }) {
 
   const unread = messages.filter((m) => !m.read).length;
 
+  // ID pesan yang sudah pernah terlihat (untuk deteksi pesan baru)
+  const seenIdsRef = useRef(new Set((initialMessages || []).map((m) => m.id)));
+
   async function refreshAnalytics() {
     try {
       const res = await fetch("/api/admin/analytics");
@@ -324,6 +349,56 @@ export default function AdminApp({ initialContent, initialMessages }) {
   }
   // muat statistik pengunjung saat dashboard dibuka
   useEffect(() => { refreshAnalytics(); }, []);
+
+  // minta izin notifikasi browser sekali di awal
+  useEffect(() => {
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      try { Notification.requestPermission(); } catch {}
+    }
+  }, []);
+
+  // tampilkan jumlah belum dibaca di judul tab browser
+  useEffect(() => {
+    const base = "Admin — " + (initialContent?.brand?.name || "Camp 3GRT");
+    document.title = unread > 0 ? `(${unread}) ${base}` : base;
+  }, [unread, initialContent]);
+
+  // cek pesan baru secara berkala -> toast + bunyi + notifikasi browser
+  useEffect(() => {
+    let stopped = false;
+    async function poll() {
+      try {
+        const res = await fetch("/api/admin/messages");
+        if (!res.ok) return;
+        const data = await res.json();
+        const fresh = data.filter((m) => !seenIdsRef.current.has(m.id));
+        if (fresh.length > 0) {
+          fresh.forEach((m) => seenIdsRef.current.add(m.id));
+          setMessages(data);
+          notifyNewMessages(fresh);
+        }
+      } catch {}
+    }
+    const id = setInterval(() => { if (!stopped && !document.hidden) poll(); }, 20000);
+    return () => { stopped = true; clearInterval(id); };
+  }, []);
+
+  function notifyNewMessages(list) {
+    const n = list.length;
+    const first = list[0];
+    showToast(`📩 ${n} pesan baru dari ${first.name}`, true);
+    playBeep();
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      try {
+        const note = new Notification("Pesan baru — Camp 3GRT", {
+          body: `${first.name} • ${first.program}` + (n > 1 ? ` (+${n - 1} lainnya)` : ""),
+          icon: "/images/favicon.png",
+          tag: "pesan-3grt",
+        });
+        note.onclick = () => { window.focus(); setPanel("messages"); note.close(); };
+      } catch {}
+    }
+  }
 
   // peringatkan kalau menutup tab dengan perubahan belum disimpan
   useEffect(() => {
@@ -386,7 +461,12 @@ export default function AdminApp({ initialContent, initialMessages }) {
   async function refreshMessages() {
     try {
       const res = await fetch("/api/admin/messages");
-      if (res.ok) { setMessages(await res.json()); showToast("Pesan diperbarui ✓"); }
+      if (res.ok) {
+        const data = await res.json();
+        data.forEach((m) => seenIdsRef.current.add(m.id));
+        setMessages(data);
+        showToast("Pesan diperbarui ✓");
+      }
     } catch {}
   }
   async function setRead(id, read) {

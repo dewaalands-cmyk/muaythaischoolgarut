@@ -23,11 +23,11 @@ export function mergeDeep(base, override) {
     }
     return out;
   }
-  // Treat empty string same as "not set" — fall back to base default value.
-  // This ensures EN default translations from defaultContent are used when
-  // admin hasn't filled in the EN field yet (stored as "" in DB).
-  if (override === undefined || override === null || override === "") return base;
-  return override;
+  // Field yang sengaja dikosongkan admin ("") tetap dihormati sebagai kosong
+  // (tidak dikembalikan ke nilai default). Hanya key yang benar-benar tidak ada
+  // (undefined/null) yang memakai default. Terjemahan EN dibuat otomatis,
+  // jadi tidak lagi bergantung pada fallback default untuk field _en.
+  return override === undefined || override === null ? base : override;
 }
 
 // Ambil isi website. Kalau DB belum terisi / error -> pakai default.

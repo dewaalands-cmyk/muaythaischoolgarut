@@ -80,10 +80,15 @@ export default function ContactForm({ pricing = [], whatsapp, t: tProp, preselec
 
       {status === "ok" && (
         <div className="form-success">
-          {t.success}{" "}
-          <a href={waLink(whatsapp, t.waMsg(form.name || ""))} target="_blank" rel="noopener">
-            {t.successWa}
-          </a>
+          {t.success}
+          {whatsapp && (
+            <>
+              {" "}
+              <a href={waLink(whatsapp, t.waMsg(form.name || ""))} target="_blank" rel="noopener">
+                {t.successWa}
+              </a>
+            </>
+          )}
         </div>
       )}
       {status === "err" && <div className="form-error">{t.error}</div>}
