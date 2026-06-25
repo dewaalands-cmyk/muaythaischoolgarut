@@ -1,7 +1,7 @@
 "use client";
+import { useState } from "react";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { T } from "@/lib/translations";
-import { waLink } from "@/lib/wa";
 import { Icon } from "@/components/site/Icons";
 import Navbar from "@/components/site/Navbar";
 import Faq from "@/components/site/Faq";
@@ -22,13 +22,14 @@ function buildSocials(ct) {
   if (tt) out.push({ k: "tiktok", url: tt, label: "TikTok" });
   if (fb) out.push({ k: "facebook", url: fb, label: "Facebook" });
   if (yt) out.push({ k: "youtube", url: yt, label: "YouTube" });
-  if (ct.whatsapp) out.push({ k: "whatsapp", url: waLink(ct.whatsapp), label: "WhatsApp" });
+  if (ct.whatsapp) out.push({ k: "whatsapp", url: "#kontak", label: "WhatsApp", internal: true });
   return out;
 }
 
 function PageInner({ content: c }) {
   const { lang } = useLanguage();
   const t = T[lang];
+  const [preselectPkg, setPreselectPkg] = useState("");
   const tel = (c.contact.phone || "").replace(/[^0-9+]/g, "");
   const socials = buildSocials(c.contact);
   const year = new Date().getFullYear();
@@ -202,9 +203,8 @@ function PageInner({ content: c }) {
                 </ul>
                 <a
                   className={"btn " + (p.popular ? "btn-primary" : "btn-outline") + " btn-block"}
-                  href={waLink(c.contact.whatsapp, t.pricing.waMsg(g(p.nameEn, p.name)))}
-                  target="_blank"
-                  rel="noopener"
+                  href="#kontak"
+                  onClick={() => setPreselectPkg(p.name)}
                 >
                   {g(p.ctaEn, p.cta) || t.pricing.defaultCta}
                 </a>
@@ -302,7 +302,7 @@ function PageInner({ content: c }) {
               )}
             </div>
             <div className="reveal d1">
-              <ContactForm pricing={c.pricing} whatsapp={c.contact.whatsapp} t={t.form} />
+              <ContactForm pricing={c.pricing} whatsapp={c.contact.whatsapp} t={t.form} preselect={preselectPkg} />
             </div>
           </div>
         </div>
@@ -378,7 +378,13 @@ function PageInner({ content: c }) {
           {socials.length > 0 && (
             <div className="footer-socials">
               {socials.map((s) => (
-                <a key={s.k} href={s.url} target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label={s.label}>
+                <a
+                  key={s.k}
+                  href={s.url}
+                  {...(s.internal ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                  className="footer-social-icon"
+                  aria-label={s.label}
+                >
                   <Icon name={s.k} size={20} />
                   <span>{s.label}</span>
                 </a>

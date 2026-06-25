@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { waLink } from "@/lib/wa";
 
 const DEFAULT_T = {
@@ -16,11 +16,16 @@ const DEFAULT_T = {
   fmtPkg: (name, price, period) => price ? `${name} – Rp ${price}${period || ""}` : name,
 };
 
-export default function ContactForm({ pricing = [], whatsapp, t: tProp }) {
+export default function ContactForm({ pricing = [], whatsapp, t: tProp, preselect }) {
   const t = tProp || DEFAULT_T;
   const [form, setForm] = useState({ name: "", phone: "", program: "", message: "" });
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Saat tombol paket di bagian Harga diklik, paket itu langsung terpilih di sini.
+  useEffect(() => {
+    if (preselect) setForm((f) => ({ ...f, program: preselect }));
+  }, [preselect]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
