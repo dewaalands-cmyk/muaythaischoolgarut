@@ -7,7 +7,8 @@ async function checkAuth() {
   return verifyToken(token);
 }
 
-const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+// SVG sengaja TIDAK diizinkan: file SVG bisa menyisipkan <script> (risiko XSS).
+const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(request) {

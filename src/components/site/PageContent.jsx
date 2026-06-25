@@ -12,6 +12,14 @@ function toUrl(val, fallback) {
   if (!val) return null;
   return val.startsWith("http") ? val : fallback(val);
 }
+// Hanya izinkan URL http/https (cegah javascript:, data:, dll).
+function safeHttp(val) {
+  if (!val) return null;
+  const v = String(val).trim();
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^[\w.-]+\.[a-z]{2,}/i.test(v)) return "https://" + v; // "contoh.com" -> https://contoh.com
+  return null;
+}
 function buildSocials(ct) {
   const out = [];
   const ig = toUrl(ct.instagram, (v) => "https://instagram.com/" + v.replace(/^@/, ""));
@@ -326,8 +334,8 @@ function PageInner({ content: c }) {
                   <div className="partner-info">
                     <h3 className="partner-name">{p.name}</h3>
                     {(g(p.descEn, p.desc)) && <p className="partner-desc">{g(p.descEn, p.desc)}</p>}
-                    {p.website && (
-                      <a href={p.website} target="_blank" rel="noopener noreferrer" className="partner-link">
+                    {safeHttp(p.website) && (
+                      <a href={safeHttp(p.website)} target="_blank" rel="noopener noreferrer" className="partner-link">
                         {t.partners.visit} <Icon name="external" size={14} />
                       </a>
                     )}
