@@ -67,7 +67,7 @@ export const defaultContent = {
   pricing: [
     {
       id: "pr1",
-      name: "Paket Trial", nameEn: "Trial Package",
+      name: "Pertemuan", nameEn: "Single Session",
       desc: "Coba latihan pertama kamu tanpa risiko.", descEn: "Try your first training session with no risk.",
       price: "50.000", period: "/ 1 sesi",
       popular: false,
