@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { waLink } from "@/lib/wa";
 
 const DEFAULT_T = {
@@ -13,14 +13,22 @@ const DEFAULT_T = {
   successWa: "Atau chat langsung via WhatsApp →",
   error: "Gagal mengirim. Coba lagi atau hubungi via WhatsApp.",
   waMsg: (name) => `Halo, saya ${name} ingin tanya soal kelas Muay Thai.`,
-  fmtPkg: (name, price, period) => price ? `${name} – Rp ${price}${period || ""}` : name,
+  fmtPkg: (name, price, period) => {
+    const amount = String(price ?? "").trim();
+    if (!amount) return name;
+    return /^\d+(?:[.,]\d+)*$/.test(amount.replace(/\s/g, ""))
+      ? `${name} | Rp ${amount}${period || ""}`
+      : `${name} | ${amount}`;
+  },
 };
 
 export default function ContactForm({ pricing = [], whatsapp, t: tProp, preselect }) {
-  const t = tProp || DEFAULT_T;
+  const t = { ...DEFAULT_T, ...tProp };
+  const formId = useId();
   const [form, setForm] = useState({ name: "", phone: "", program: "", message: "" });
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
 
   // Saat tombol paket di bagian Harga diklik, paket itu langsung terpilih di sini.
   useEffect(() => {
@@ -31,6 +39,7 @@ export default function ContactForm({ pricing = [], whatsapp, t: tProp, preselec
 
   async function submit(e) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setStatus(null);
     try {
@@ -40,6 +49,7 @@ export default function ContactForm({ pricing = [], whatsapp, t: tProp, preselec
         body: JSON.stringify(form),
       });
       if (res.ok) {
+        setSubmittedName(form.name.trim());
         setStatus("ok");
         setForm({ name: "", phone: "", program: "", message: "" });
       } else {
@@ -52,20 +62,20 @@ export default function ContactForm({ pricing = [], whatsapp, t: tProp, preselec
   }
 
   return (
-    <form className="contact-form" onSubmit={submit}>
+    <form className="contact-form" onSubmit={submit} aria-busy={loading}>
       <div className="form-row">
         <div className="fld">
-          <label>{t.name} *</label>
-          <input type="text" value={form.name} onChange={set("name")} placeholder={t.namePh} required minLength={2} />
+          <label htmlFor={`${formId}-name`}>{t.name} *</label>
+          <input id={`${formId}-name`} name="name" type="text" autoComplete="name" value={form.name} onChange={set("name")} placeholder={t.namePh} required minLength={2} disabled={loading} />
         </div>
         <div className="fld">
-          <label>{t.phone} *</label>
-          <input type="tel" value={form.phone} onChange={set("phone")} placeholder={t.phonePh} required minLength={6} />
+          <label htmlFor={`${formId}-phone`}>{t.phone} *</label>
+          <input id={`${formId}-phone`} name="phone" type="tel" autoComplete="tel" inputMode="tel" value={form.phone} onChange={set("phone")} placeholder={t.phonePh} required minLength={6} disabled={loading} />
         </div>
       </div>
       <div className="fld">
-        <label>{t.package} *</label>
-        <select value={form.program} onChange={set("program")} required>
+        <label htmlFor={`${formId}-program`}>{t.package} *</label>
+        <select id={`${formId}-program`} name="program" value={form.program} onChange={set("program")} required disabled={loading}>
           <option value="">{t.packageDefault}</option>
           {pricing.map((p) => (
             <option key={p.id} value={p.name}>{t.fmtPkg(p.name, p.price, p.period)}</option>
@@ -74,24 +84,30 @@ export default function ContactForm({ pricing = [], whatsapp, t: tProp, preselec
         </select>
       </div>
       <div className="fld">
-        <label>{t.message}</label>
-        <textarea value={form.message} onChange={set("message")} placeholder={t.messagePh} rows={3} />
+        <label htmlFor={`${formId}-message`}>{t.message}</label>
+        <textarea id={`${formId}-message`} name="message" value={form.message} onChange={set("message")} placeholder={t.messagePh} rows={3} disabled={loading} />
       </div>
 
       {status === "ok" && (
-        <div className="form-success">
-          {t.success}
+        <div className="form-success" role="status" aria-live="polite">
+          <p className="form-status-copy">{t.success}</p>
           {whatsapp && (
-            <>
-              {" "}
-              <a href={waLink(whatsapp, t.waMsg(form.name || ""))} target="_blank" rel="noopener">
-                {t.successWa}
-              </a>
-            </>
+            <a className="form-fallback" href={waLink(whatsapp, t.waMsg(submittedName))} target="_blank" rel="noopener noreferrer">
+              {t.successWa}
+            </a>
           )}
         </div>
       )}
-      {status === "err" && <div className="form-error">{t.error}</div>}
+      {status === "err" && (
+        <div className="form-error" role="alert">
+          <p className="form-status-copy">{t.error}</p>
+          {whatsapp && (
+            <a className="form-fallback" href={waLink(whatsapp, t.waMsg(form.name.trim()))} target="_blank" rel="noopener noreferrer">
+              {t.successWa}
+            </a>
+          )}
+        </div>
+      )}
 
       <button className="btn btn-primary btn-block" type="submit" disabled={loading}>
         {loading ? t.sending : t.submit}

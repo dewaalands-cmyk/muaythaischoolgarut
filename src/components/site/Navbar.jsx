@@ -1,19 +1,33 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useRef } from "react";
 import LangSwitch from "@/components/site/LangSwitch";
 
-export default function Navbar({ brand, t }) {
-  const [scrolled, setScrolled] = useState(false);
+export default function Navbar({ brand, t, hasTestimonials = true }) {
   const [open, setOpen] = useState(false);
   const [logoErr, setLogoErr] = useState(false);
+  const toggleRef = useRef(null);
+  const linksId = useId();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const desktop = window.matchMedia("(min-width: 1101px)");
+    const closeOnDesktop = () => {
+      if (desktop.matches) setOpen(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
   }, []);
 
   const logoSrc = brand?.logo || "/images/logo.svg";
+
+  useEffect(() => setLogoErr(false), [logoSrc]);
+
+  function handleKeyDown(event) {
+    if (event.key === "Escape" && open) {
+      event.preventDefault();
+      setOpen(false);
+      toggleRef.current?.focus();
+    }
+  }
 
   const links = t ? [
     ["#about", t.nav.about],
@@ -31,13 +45,13 @@ export default function Navbar({ brand, t }) {
   ];
 
   return (
-    <nav className={"navbar" + (scrolled ? " scrolled" : "") + (open ? " nav-open" : "")}>
+    <nav className={"navbar scrolled" + (open ? " nav-open" : "")} aria-label="Menu" onKeyDown={handleKeyDown} onBlur={(event) => { if (open && !event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
       <div className="container nav-inner">
-        <a href="#hero" className="brand">
+        <a href="#hero" className="brand" onClick={() => setOpen(false)}>
           {!logoErr ? (
             <img src={logoSrc} alt={brand?.name || "Logo"} width="40" height="40" className="brand-logo" onError={() => setLogoErr(true)} />
           ) : (
-            <div className="brand-logo-fallback">{(brand?.name || "3G").slice(0, 2).toUpperCase()}</div>
+            <span className="brand-logo-fallback" aria-hidden="true">{(brand?.name || "3G").slice(0, 2).toUpperCase()}</span>
           )}
           <span className="brand-text">
             <span className="brand-name">{brand?.name || "Camp 3GRT"}</span>
@@ -45,12 +59,12 @@ export default function Navbar({ brand, t }) {
           </span>
         </a>
 
-        <button className="nav-toggle" aria-label="Menu" onClick={() => setOpen(!open)}>
+        <button ref={toggleRef} type="button" className="nav-toggle" aria-label="Menu" aria-expanded={open} aria-controls={linksId} onClick={() => setOpen((value) => !value)}>
           <span /><span /><span />
         </button>
 
-        <ul className={"nav-links" + (open ? " open" : "")}>
-          {links.map(([href, label]) => (
+        <ul id={linksId} className={"nav-links" + (open ? " open" : "")} onClick={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+          {links.filter(([href]) => hasTestimonials || href !== "#testi").map(([href, label]) => (
             <li key={href}>
               <a href={href} onClick={() => setOpen(false)}>{label}</a>
             </li>

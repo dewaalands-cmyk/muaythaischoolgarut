@@ -845,10 +845,11 @@ export default function AdminApp({ initialContent, initialMessages }) {
                     <Field label="Level / Badge" value={p.level} onChange={(v) => edit((c) => (c.programs[i].level = v))} />
                   </div>
                   <SelectField label="Ikon" value={p.icon} options={ICON_OPTIONS} onChange={(v) => edit((c) => (c.programs[i].icon = v))} />
+                  <ImageField label="Foto Program" value={p.image} onChange={(v) => edit((c) => (c.programs[i].image = v))} />
                   <Area label="Deskripsi" value={p.desc} onChange={(v) => edit((c) => (c.programs[i].desc = v))} rows={2} />
                 </ItemCard>
               ))}
-              <AddBtn label="Tambah Program" onClick={() => edit((c) => c.programs.push({ id: "p" + Date.now(), icon: "boxing", name: "Program Baru", level: "Semua Level", desc: "" }))} />
+              <AddBtn label="Tambah Program" onClick={() => edit((c) => c.programs.push({ id: "p" + Date.now(), icon: "boxing", name: "Program Baru", level: "Semua Level", image: "", desc: "" }))} />
             </div>
           )}
 

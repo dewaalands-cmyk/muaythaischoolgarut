@@ -11,6 +11,7 @@ export function LanguageProvider({ children }) {
       if (s === "en") setLang("en");
     } catch {}
   }, []);
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   function toggle() {
     const next = lang === "id" ? "en" : "id";
     setLang(next);

@@ -2,421 +2,229 @@
 import { useState } from "react";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { T } from "@/lib/translations";
-import { Icon } from "@/components/site/Icons";
+import { preparePresentationContent } from "@/lib/presentationContent";
+import { waLink } from "@/lib/wa";
 import Navbar from "@/components/site/Navbar";
 import Faq from "@/components/site/Faq";
 import ContactForm from "@/components/site/ContactForm";
-import ScrollFX from "@/components/site/ScrollFX";
+import "./public-site.css";
 
-function toUrl(val, fallback) {
-  if (!val) return null;
-  return val.startsWith("http") ? val : fallback(val);
+function safeHttp(value) {
+  if (!value) return null;
+  const text = String(value).trim();
+  try {
+    const url = new URL(/^https?:\/\//i.test(text) ? text : `https://${text}`);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : null;
+  } catch { return null; }
 }
-// Hanya izinkan URL http/https (cegah javascript:, data:, dll).
-function safeHttp(val) {
-  if (!val) return null;
-  const v = String(val).trim();
-  if (/^https?:\/\//i.test(v)) return v;
-  if (/^[\w.-]+\.[a-z]{2,}/i.test(v)) return "https://" + v; // "contoh.com" -> https://contoh.com
-  return null;
+
+function socialsFor(contact) {
+  return [
+    ["Instagram", contact.instagram, (v) => `https://www.instagram.com/${v.replace(/^@/, "")}/`],
+    ["TikTok", contact.tiktok, (v) => `https://www.tiktok.com/@${v.replace(/^@/, "")}`],
+    ["Facebook", contact.facebook, (v) => `https://www.facebook.com/${v}`],
+    ["YouTube", contact.youtube, (v) => `https://www.youtube.com/${v}`],
+  ].flatMap(([label, value, fallback]) => {
+    const href = value && safeHttp(/^https?:\/\//i.test(value) ? value : fallback(value));
+    return href ? [{ label, href }] : [];
+  });
 }
-function buildSocials(ct) {
-  const out = [];
-  const ig = toUrl(ct.instagram, (v) => "https://instagram.com/" + v.replace(/^@/, ""));
-  const tt = toUrl(ct.tiktok, (v) => "https://tiktok.com/@" + v.replace(/^@/, ""));
-  const fb = toUrl(ct.facebook, (v) => "https://facebook.com/" + v);
-  const yt = toUrl(ct.youtube, (v) => "https://youtube.com/" + v);
-  if (ig) out.push({ k: "instagram", url: ig, label: "Instagram" });
-  if (tt) out.push({ k: "tiktok", url: tt, label: "TikTok" });
-  if (fb) out.push({ k: "facebook", url: fb, label: "Facebook" });
-  if (yt) out.push({ k: "youtube", url: yt, label: "YouTube" });
-  if (ct.whatsapp) out.push({ k: "whatsapp", url: "#kontak", label: "WhatsApp", internal: true });
-  return out;
+
+function Programs({ programs, lang }) {
+  const g = (en, id) => lang === "en" && en ? en : id;
+  const visuals = {
+    p1: { src: "/images/programs/group-training.webp", illustration: true },
+    p2: { src: "/images/programs/personal-training.webp", illustration: true },
+    p3: { src: "/images/camp/muay-kids.webp", position: "50% 0%" },
+    p4: { src: "/images/camp/interior-display.webp", position: "50% 68%" },
+  };
+  return (
+    <div className="program-image-grid">
+      {programs.map((program) => {
+        const name = g(program.nameEn, program.name);
+        const fallback = /weight|beban/i.test(program.name) ? { src: "/images/programs/weight-training.webp", illustration: true }
+          : /diet|nutr/i.test(program.name) ? { src: "/images/programs/diet-nutrition.webp", illustration: true }
+          : { src: "/images/camp/interior-display.webp" };
+        const visual = program.image ? { ...visuals[program.id], src: program.image, illustration: /^\/images\/programs\//.test(program.image) } : visuals[program.id] || fallback;
+        return <article className="program-image-card" key={program.id}>
+          <div className="program-card-photo"><img src={visual.src} alt={visual.illustration ? (lang === "en" ? "Illustration: " : "Ilustrasi: ") + name : name} style={{ objectPosition: visual.position || "50% 50%" }} width="960" height="600" loading="lazy" /></div>
+          <div className="program-card-copy"><h3>{name}</h3><p>{g(program.descEn, program.desc)}</p></div>
+        </article>;
+      })}
+    </div>
+  );
+}
+
+function Schedule({ days, lang, emptyText }) {
+  const [selected, setSelected] = useState(0);
+  const day = days[selected] || days[0];
+  if (!day) return null;
+  function move(event, index) {
+    const keys = { ArrowRight: (index + 1) % days.length, ArrowLeft: (index + days.length - 1) % days.length, Home: 0, End: days.length - 1 };
+    if (event.key in keys) {
+      event.preventDefault();
+      const next = keys[event.key];
+      setSelected(next);
+      event.currentTarget.parentElement.children[next]?.focus();
+    }
+  }
+  return (
+    <div className="schedule-board">
+      <div className="day-tabs" role="tablist" aria-label={lang === "en" ? "Training day" : "Hari latihan"}>
+        {days.map((item, index) => (
+          <button type="button" role="tab" id={`day-${index}`} aria-controls={`day-panel-${index}`} aria-selected={selected === index} tabIndex={selected === index ? 0 : -1} key={item.day} onClick={() => setSelected(index)} onKeyDown={(event) => move(event, index)}>
+            {lang === "en" && item.dayEn ? item.dayEn : item.day}
+          </button>
+        ))}
+      </div>
+      {days.map((item, index) => (
+        <div className="day-panel" role="tabpanel" id={`day-panel-${index}`} aria-labelledby={`day-${index}`} hidden={selected !== index} key={item.day} tabIndex={0}>
+          {item.sessions?.length ? item.sessions.map((session, i) => (
+            <div className="session-row" key={i}>
+              <time>{session.time}</time>
+              <h3>{session.name}</h3>
+              {session.coach && <span>{session.coach}</span>}
+            </div>
+          )) : <p className="schedule-empty">{emptyText}</p>}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function PageInner({ content: c }) {
   const { lang } = useLanguage();
   const t = T[lang];
+  const g = (en, id) => lang === "en" && en ? en : id;
   const [preselectPkg, setPreselectPkg] = useState("");
+  const socials = socialsFor(c.contact);
+  const whatsapp = c.contact.whatsapp ? waLink(c.contact.whatsapp, lang === "en" ? "Hello, I'd like to ask about the Muay Thai class schedule." : "Halo, saya ingin tanya jadwal kelas Muay Thai.") : null;
   const tel = (c.contact.phone || "").replace(/[^0-9+]/g, "");
-  const socials = buildSocials(c.contact);
-  const year = new Date().getFullYear();
-  // Helper: return EN value if lang=en and EN is non-empty, otherwise ID
-  const g = (en, id) => (lang === "en" && en) ? en : id;
 
   return (
-    <>
-      <Navbar brand={c.brand} t={t} />
+    <div className="public-site">
+      <a className="skip-link" href="#main-content">{lang === "en" ? "Skip to content" : "Lewati ke konten"}</a>
+      <Navbar brand={c.brand} t={t} hasTestimonials={c.testimonials.length > 0} />
+      <main id="main-content">
+        <section className="camp-hero" id="hero" aria-labelledby="hero-heading">
+          <div className="hero-image"><img src={c.hero.bgImage} alt={c.brand.tagline} width="1672" height="941" fetchPriority="high" /></div>
+          <div className="container hero-composition">
+            <div className="hero-copy">
+              <p className="hero-hours">{g(c.hero.badgeEn, c.hero.badge)}</p>
+              <h1 id="hero-heading"><span>{g(c.hero.titleTopEn, c.hero.titleTop)}</span><span>{g(c.hero.titleBottomEn, c.hero.titleBottom)}</span></h1>
+              <p className="hero-description">{g(c.hero.subtitleEn, c.hero.subtitle)}</p>
 
-      {/* ============ HERO ============ */}
-      <section className="hero" id="hero">
-        <div className="hero-bg"><img src={c.hero.bgImage} alt="" /></div>
-        <div className="container hero-inner">
-          <span className="hero-badge"><span className="dot" />{g(c.hero.badgeEn, c.hero.badge)}</span>
-          <h1>
-            <span className="stroke">{g(c.hero.titleTopEn, c.hero.titleTop)}</span>
-            <span className="solid">{g(c.hero.titleBottomEn, c.hero.titleBottom)}</span>
-          </h1>
-          <p className="hero-sub">{g(c.hero.subtitleEn, c.hero.subtitle)}</p>
-          <div className="hero-actions">
-            <a className="btn btn-primary btn-lg" href="#kontak">
-              <Icon name="whatsapp" /> <span>{g(c.hero.ctaPrimaryEn, c.hero.ctaPrimary)}</span>
-            </a>
-            <a className="btn btn-outline btn-lg" href="#program"><span>{g(c.hero.ctaSecondaryEn, c.hero.ctaSecondary)}</span></a>
-          </div>
-        </div>
-        <div className="scroll-cue"><div className="mouse" /><span>{t.hero.scroll}</span></div>
-      </section>
-
-      {/* ============ VALUES ============ */}
-      <div className="values">
-        <div className="container">
-          <div className="values-track">
-            {(lang === "en" && c.valuesEn?.length ? c.valuesEn : c.values).map((v, i) => <span key={i} className="values-item">{v}</span>)}
-          </div>
-        </div>
-      </div>
-
-      {/* ============ ABOUT ============ */}
-      <section className="section" id="about">
-        <div className="container">
-          <div className="about-grid">
-            <div className="about-media reveal">
-              <img src={c.about.image} alt="Camp 3GRT Muaythai School Garut" />
-              <div className="badge-float">
-                <span className="num">3GRT</span>
-                <span className="lbl">{t.about.badge}</span>
-              </div>
             </div>
-            <div className="about-body reveal d1">
-              <span className="eyebrow">{t.about.eyebrow}</span>
-              <h2 className="section-title">{g(c.about.headingEn, c.about.heading)}</h2>
+
+          </div>
+        </section>
+
+        <div className="camp-values" aria-label={lang === "en" ? "Camp values" : "Nilai camp"}>
+          <div className="values-marquee">{[0, 1].map((copy) => <div className="values-run" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{(lang === "en" && c.valuesEn?.length ? c.valuesEn : c.values).map((value, index) => <span key={index}>{value}</span>)}</div>)}</div>
+        </div>
+
+        <section className="camp-section about-section" id="about" aria-labelledby="about-heading">
+          <div className="container about-composition">
+            <figure className="team-photo"><img src={c.about.image} alt={lang === "en" ? "Camp 3GRT coaches and athletes" : "Tim pelatih dan atlet Camp 3GRT"} loading="lazy" width="900" height="900" /></figure>
+            <div className="about-copy">
+              <h2 id="about-heading">{g(c.about.headingEn, c.about.heading)}</h2>
               <p className="lead">{g(c.about.leadEn, c.about.lead)}</p>
               <p>{g(c.about.bodyEn, c.about.body)}</p>
-              <div className="stats">
-                {c.about.stats.map((s, i) => (
-                  <div key={i} className="stat"><div className="v">{s.value}</div><div className="l">{g(s.labelEn, s.label)}</div></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ PROGRAMS ============ */}
-      <section className="section" id="program" style={{ background: "var(--bg-2)" }}>
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.programs.eyebrow}</span>
-            <h2 className="section-title">{t.programs.title} <span className="hl">{t.programs.titleHl}</span></h2>
-            <p className="section-sub">{t.programs.sub}</p>
-          </div>
-          <div className="grid-3">
-            {c.programs.map((p) => (
-              <article key={p.id} className="card reveal">
-                <div className="prog-icon"><Icon name={p.icon} /></div>
-                <span className="prog-level">{g(p.levelEn, p.level)}</span>
-                <h3>{g(p.nameEn, p.name)}</h3>
-                <p>{g(p.descEn, p.desc)}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ COACHES ============ */}
-      <section className="section" id="coach">
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.coaches.eyebrow}</span>
-            <h2 className="section-title">{t.coaches.title} <span className="hl">{t.coaches.titleHl}</span></h2>
-            <p className="section-sub">{t.coaches.sub}</p>
-          </div>
-          <div className="grid-3">
-            {c.coaches.map((co) => (
-              <article key={co.id} className="coach-card reveal">
-                <div className="coach-photo">
-                  <img src={co.image} alt={`${co.name} - ${g(co.roleEn, co.role)}`} loading="lazy" />
-                  <div className="coach-name-wrap">
-                    <div className="role">{g(co.roleEn, co.role)}</div>
-                    <h3>{co.name}</h3>
-                  </div>
-                </div>
-                <div className="coach-info">
-                  <p>{g(co.bioEn, co.bio)}</p>
-                  <div className="coach-tags">
-                    {(lang === "en" && co.specialtiesEn?.length ? co.specialtiesEn : (co.specialties || [])).map((tag, i) => <span key={i}>{tag}</span>)}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ SCHEDULE ============ */}
-      <section className="section" id="jadwal" style={{ background: "var(--bg-2)" }}>
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.schedule.eyebrow}</span>
-            <h2 className="section-title">{t.schedule.title} <span className="hl">{t.schedule.titleHl}</span></h2>
-            <p className="section-sub">{t.schedule.sub}</p>
-          </div>
-          <div className="sched-grid">
-            {c.schedule.map((d, i) => (
-              <div key={i} className="sched-day">
-                <div className="day-head">{g(d.dayEn, d.day)}</div>
-                <div className="sessions">
-                  {d.sessions && d.sessions.length ? (
-                    d.sessions.map((s, j) => (
-                      <div key={j} className="sess">
-                        <div className="time">{s.time}</div>
-                        <div className="name">{s.name}</div>
-                        <div className="coach">{s.coach}</div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="sched-empty">{t.schedule.empty}</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ PRICING ============ */}
-      <section className="section" id="harga">
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.pricing.eyebrow}</span>
-            <h2 className="section-title">{t.pricing.title} <span className="hl">{t.pricing.titleHl}</span></h2>
-            <p className="section-sub">{t.pricing.sub}</p>
-          </div>
-          <div className="price-grid">
-            {c.pricing.map((p) => (
-              <div key={p.id} className={"price-card" + (p.popular ? " popular" : "")}>
-                {p.popular && <div className="price-badge">{t.pricing.popular}</div>}
-                <h3>{g(p.nameEn, p.name)}</h3>
-                <p className="desc">{g(p.descEn, p.desc)}</p>
-                <div className="price-amount">
-                  <span className="rp">Rp</span>
-                  <span className="num">{p.price}</span>
-                  <span className="per">{p.period}</span>
-                </div>
-                <ul className="price-feats">
-                  {(lang === "en" && p.featuresEn?.length ? p.featuresEn : (p.features || [])).map((f, i) => (
-                    <li key={i}><Icon name="check" strokeWidth={2.5} /><span>{f}</span></li>
-                  ))}
-                </ul>
-                <a
-                  className={"btn " + (p.popular ? "btn-primary" : "btn-outline") + " btn-block"}
-                  href="#kontak"
-                  onClick={() => setPreselectPkg(p.name)}
-                >
-                  {g(p.ctaEn, p.cta) || t.pricing.defaultCta}
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ TESTIMONIALS ============ */}
-      <section className="section" id="testi" style={{ background: "var(--bg-2)" }}>
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.testimonials.eyebrow}</span>
-            <h2 className="section-title">{t.testimonials.title} <span className="hl">{t.testimonials.titleHl}</span></h2>
-            <p className="section-sub">{t.testimonials.sub}</p>
-          </div>
-          <div className="testi-grid">
-            {c.testimonials.map((item) => (
-              <figure key={item.id} className="testi reveal">
-                <div className="stars">
-                  {Array.from({ length: item.rating || 5 }).map((_, i) => <Icon key={i} name="star" />)}
-                </div>
-                <blockquote>{g(item.quoteEn, item.quote)}</blockquote>
-                <figcaption className="who">
-                  <div className="av">{(item.name || "?").charAt(0).toUpperCase()}</div>
-                  <div>
-                    <div className="nm">{item.name}</div>
-                    <div className="rl">{g(item.roleEn, item.role)}</div>
-                  </div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ GALLERY ============ */}
-      <section className="section" id="galeri">
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.gallery.eyebrow}</span>
-            <h2 className="section-title">{t.gallery.title} <span className="hl">{t.gallery.titleHl}</span></h2>
-            <p className="section-sub">{t.gallery.sub}</p>
-          </div>
-          <div className="gallery-scroll">
-            {c.gallery.map((item, i) => (
-              <div key={i} className="gallery-item">
-                <img src={item.image} alt={g(item.captionEn, item.caption)} loading="lazy" />
-                <div className="cap">{g(item.captionEn, item.caption)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ FAQ ============ */}
-      <section className="section" id="faq" style={{ background: "var(--bg-2)" }}>
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.faq.eyebrow}</span>
-            <h2 className="section-title">{t.faq.title} <span className="hl">{t.faq.titleHl}</span></h2>
-          </div>
-          <Faq items={c.faq.map(f => ({ q: g(f.qEn, f.q), a: g(f.aEn, f.a) }))} />
-        </div>
-      </section>
-
-      {/* ============ CTA BAND ============ */}
-      <section className="cta-band">
-        <div className="container">
-          <h2>{t.cta.title}</h2>
-          <p>{t.cta.sub}</p>
-          <a className="btn btn-primary btn-lg" href="#kontak">{t.cta.btn}</a>
-        </div>
-      </section>
-
-      {/* ============ CONTACT ============ */}
-      <section className="section" id="kontak">
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t.contact.eyebrow}</span>
-            <h2 className="section-title">{t.contact.title} <span className="hl">{t.contact.titleHl}</span></h2>
-            <p className="section-sub">{t.contact.sub}</p>
-          </div>
-          <div className="contact-grid">
-            <div className="contact-info reveal">
-              {g(c.contact.addressEn, c.contact.address) && (
-                <div className="info-row">
-                  <div className="ic"><Icon name="pin" /></div>
-                  <div><div className="lbl">{t.contact.location}</div><div className="val">{g(c.contact.addressEn, c.contact.address)}</div></div>
-                </div>
-              )}
-              {c.contact.mapsEmbed && c.contact.mapsEmbed.includes("google.com/maps") && (
-                <div className="map-embed">
-                  <iframe src={c.contact.mapsEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title={t.contact.mapTitle} allowFullScreen />
-                </div>
-              )}
-            </div>
-            <div className="reveal d1">
-              <ContactForm pricing={c.pricing} whatsapp={c.contact.whatsapp} t={t.form} preselect={preselectPkg} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ MITRA ============ */}
-      {c.partners && c.partners.length > 0 && (
-        <section className="section" id="mitra" style={{ background: "var(--bg-2)" }}>
-          <div className="container">
-            <div className="section-head reveal">
-              <span className="eyebrow">{t.partners.eyebrow}</span>
-              <h2 className="section-title">{t.partners.title} <span className="hl">{t.partners.titleHl}</span></h2>
-              <p className="section-sub">{t.partners.sub}</p>
-            </div>
-            <div className="partners-grid reveal">
-              {c.partners.map((p, i) => (
-                <div key={p.id || i} className="partner-card">
-                  {p.logo && <img src={p.logo} alt={p.name} className="partner-logo" />}
-                  <div className="partner-info">
-                    <h3 className="partner-name">{p.name}</h3>
-                    {(g(p.descEn, p.desc)) && <p className="partner-desc">{g(p.descEn, p.desc)}</p>}
-                    {safeHttp(p.website) && (
-                      <a href={safeHttp(p.website)} target="_blank" rel="noopener noreferrer" className="partner-link">
-                        {t.partners.visit} <Icon name="external" size={14} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
+              {c.about.stats?.length > 0 && <dl className="camp-stats">{c.about.stats.map((item, index) => <div key={index}><dt>{g(item.labelEn, item.label)}</dt><dd>{item.value}</dd></div>)}</dl>}
             </div>
           </div>
         </section>
-      )}
 
-      {/* ============ FOOTER ============ */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-about">
-              <a href="#hero" className="brand">
-                <img src={c.brand.logo} alt={`Logo ${c.brand.name}`} width="44" height="44" />
-                <span className="brand-text">
-                  <span className="brand-name">{c.brand.name}</span>
-                  <span className="brand-tag">{c.brand.tagline}</span>
-                </span>
-              </a>
-              <p>{c.about.lead}</p>
-            </div>
-            <div>
-              <h4>{t.footer.nav}</h4>
-              <ul>
-                <li><a href="#about">{t.footer.about}</a></li>
-                <li><a href="#program">{t.footer.programs}</a></li>
-                <li><a href="#coach">{t.footer.coach}</a></li>
-                <li><a href="#jadwal">{t.footer.schedule}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4>{t.footer.programsHeader}</h4>
-              <ul>
-                {c.programs.slice(0, 5).map((p) => (
-                  <li key={p.id}><a href="#program">{p.name}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4>{t.footer.contactHeader}</h4>
-              {c.contact.phone && <a className="fcontact" href={"tel:" + tel}>{c.contact.phone}</a>}
-              {g(c.contact.addressEn, c.contact.address) && <span className="fcontact">{g(c.contact.addressEn, c.contact.address)}</span>}
-              {g(c.contact.hoursWeekdayEn, c.contact.hoursWeekday) && <span className="fcontact">{g(c.contact.hoursWeekdayEn, c.contact.hoursWeekday)}</span>}
+        <section className="camp-section program-section" id="program" aria-labelledby="program-heading">
+          <div className="container">
+            <header className="camp-section-heading"><h2 id="program-heading">{t.programs.title} {t.programs.titleHl}</h2><p>{t.programs.sub}</p></header>
+            <Programs programs={c.programs} lang={lang} />
+            <p className="program-visual-note">{lang === "en" ? "Camp photos and illustrative training images." : "Foto camp dan ilustrasi pendukung program latihan."}</p>
+          </div>
+        </section>
+
+        <section className="camp-section" id="coach" aria-labelledby="coach-heading">
+          <div className="container">
+            <header className="camp-section-heading"><h2 id="coach-heading">{t.coaches.title} {t.coaches.titleHl}</h2><p>{t.coaches.sub}</p></header>
+            <div className="coach-roster">
+              {c.coaches.map((coach) => <article className="coach-profile" key={coach.id}>
+                <div className="coach-portrait"><img src={coach.image} alt={coach.name} width="800" height="1000" loading="lazy" /></div>
+                <p className="coach-role">{g(coach.roleEn, coach.role)}</p>
+                <h3>{coach.name}</h3>
+                <p className="coach-bio">{g(coach.bioEn, coach.bio)}</p>
+                <ul className="coach-skills">{(lang === "en" && coach.specialtiesEn?.length ? coach.specialtiesEn : coach.specialties || []).map((skill, index) => <li key={index}>{skill}</li>)}</ul>
+              </article>)}
             </div>
           </div>
-          {socials.length > 0 && (
-            <div className="footer-socials">
-              {socials.map((s) => (
-                <a
-                  key={s.k}
-                  href={s.url}
-                  {...(s.internal ? {} : { target: "_blank", rel: "noopener noreferrer" })}
-                  className="footer-social-icon"
-                  aria-label={s.label}
-                >
-                  <Icon name={s.k} size={20} />
-                  <span>{s.label}</span>
-                </a>
-              ))}
-            </div>
-          )}
-          <div className="footer-bottom">
-            <span>{t.footer.rights(year)}</span>
-            <span>{t.footer.madeBy} <a href="https://pagiversestudio.vercel.app/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--red)", fontWeight: 600 }}>Pagiverse Studio</a></span>
-          </div>
-        </div>
-      </footer>
+        </section>
 
-      <ScrollFX />
-    </>
+        <section className="camp-section schedule-section" id="jadwal" aria-labelledby="schedule-heading">
+          <div className="container">
+            <header className="camp-section-heading"><h2 id="schedule-heading">{t.schedule.title} {t.schedule.titleHl}</h2><p>{t.schedule.sub}</p></header>
+            <Schedule days={c.schedule} lang={lang} emptyText={t.schedule.empty} />
+          </div>
+        </section>
+
+        <section className="camp-section" id="harga" aria-labelledby="pricing-heading">
+          <div className="container">
+            <header className="camp-section-heading"><h2 id="pricing-heading">{t.pricing.title} {t.pricing.titleHl}</h2><p>{t.pricing.sub}</p></header>
+            <div className="membership-list">
+              {c.pricing.map((pkg) => {
+                const numeric = /^\s*\d[\d.,\s]*\s*$/.test(String(pkg.price || ""));
+                const features = lang === "en" && pkg.featuresEn?.length ? pkg.featuresEn : pkg.features || [];
+                return <article className={`membership-row${numeric ? "" : " quote-row"}`} key={pkg.id}>
+                  <div className="membership-info"><h3>{g(pkg.nameEn, pkg.name)}</h3>{g(pkg.descEn, pkg.desc) && <p>{g(pkg.descEn, pkg.desc)}</p>}{features.length > 0 && <ul>{features.map((feature, index) => <li key={index}>{feature}</li>)}</ul>}</div>
+                  <p className="membership-price">{numeric ? <><span className="currency">Rp</span><strong>{pkg.price}</strong><span className="period">{g(pkg.periodEn, pkg.period)}</span></> : <strong className="price-on-request">{lang === "en" && /hubungi admin/i.test(pkg.price || "") ? "Ask the team" : pkg.price || (lang === "en" ? "Ask the team" : "Hubungi Admin")}</strong>}</p>
+                  <a className="btn btn-outline membership-action" href="#kontak" onClick={() => setPreselectPkg(pkg.name)}>{g(pkg.ctaEn, pkg.cta) || t.pricing.defaultCta}<span aria-hidden="true">→</span></a>
+                </article>;
+              })}
+            </div>
+          </div>
+        </section>
+
+        {c.testimonials.length > 0 ? <section className="camp-section testimonials-section" id="testi" aria-labelledby="testimonials-heading"><div className="container"><header className="camp-section-heading"><h2 id="testimonials-heading">{t.testimonials.title} {t.testimonials.titleHl}</h2></header><div className="member-stories">{c.testimonials.map((item) => <figure className="member-story" key={item.id}><blockquote>{g(item.quoteEn, item.quote)}</blockquote><figcaption><strong>{item.name}</strong><span>{g(item.roleEn, item.role)}</span></figcaption></figure>)}</div></div></section> : <span id="testi" className="anchor-target" aria-hidden="true" />}
+
+        <section className="camp-section gallery-section" id="galeri" aria-labelledby="gallery-heading">
+          <div className="container">
+            <header className="camp-section-heading"><h2 id="gallery-heading">{t.gallery.title} {t.gallery.titleHl}</h2><p>{t.gallery.sub}</p></header>
+            <div className="camp-gallery">{c.gallery.map((item, index) => <figure key={`${item.image}-${index}`}><div className="gallery-photo"><img src={item.image} alt={g(item.captionEn, item.caption) || c.brand.tagline} width="1000" height="750" loading="lazy" /></div>{g(item.captionEn, item.caption) && <figcaption>{g(item.captionEn, item.caption)}</figcaption>}</figure>)}</div>
+          </div>
+        </section>
+
+        <section className="camp-section faq-section" id="faq" aria-labelledby="faq-heading">
+          <div className="container faq-composition"><header className="camp-section-heading"><h2 id="faq-heading">{t.faq.title} {t.faq.titleHl}</h2></header><Faq items={c.faq.map((item) => ({ q: g(item.qEn, item.q), a: g(item.aEn, item.a) }))} /></div>
+        </section>
+
+        <section className="camp-section contact-section" id="kontak" aria-labelledby="contact-heading">
+          <div className="container contact-composition">
+            <div className="contact-copy"><h2 id="contact-heading">{t.contact.title} {t.contact.titleHl}</h2><p className="contact-intro">{t.contact.sub}</p>
+              {whatsapp && <a className="btn btn-primary contact-whatsapp" href={whatsapp} target="_blank" rel="noopener noreferrer">{lang === "en" ? "Chat on WhatsApp" : "Chat WhatsApp"}<span aria-hidden="true">↗</span></a>}
+              <dl className="contact-details">
+                {g(c.contact.addressEn, c.contact.address) && <div><dt>{t.contact.location}</dt><dd>{g(c.contact.addressEn, c.contact.address)}</dd></div>}
+                {g(c.contact.hoursWeekdayEn, c.contact.hoursWeekday) && <div><dt>{lang === "en" ? "Opening hours" : "Jam buka"}</dt><dd>{g(c.contact.hoursWeekdayEn, c.contact.hoursWeekday)}</dd></div>}
+                {c.contact.phone && <div><dt>{lang === "en" ? "Telephone" : "Telepon"}</dt><dd><a href={`tel:${tel}`}>{c.contact.phone}</a></dd></div>}
+              </dl>
+              {socials.length > 0 && <div className="contact-socials">{socials.map((social) => <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer">{social.label}<span aria-hidden="true">↗</span></a>)}</div>}
+              {c.contact.mapsEmbed && /^https:\/\/[^/]*google\.com\/maps\//i.test(c.contact.mapsEmbed) && <div className="camp-map"><iframe src={c.contact.mapsEmbed} title={t.contact.mapTitle} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></div>}
+            </div>
+            <div className="contact-form-panel"><h3>{lang === "en" ? "Send an enquiry" : "Kirim pertanyaan"}</h3><ContactForm pricing={c.pricing} whatsapp={c.contact.whatsapp} t={t.form} preselect={preselectPkg} /></div>
+          </div>
+        </section>
+
+        {c.partners.length > 0 && <section className="camp-section partner-section" id="mitra" aria-labelledby="partners-heading"><div className="container"><h2 id="partners-heading">{t.partners.title} {t.partners.titleHl}</h2><div className="camp-partners">{c.partners.map((partner, index) => {
+          const href = safeHttp(partner.website);
+          const logo = partner.logo ? <img src={partner.logo} alt={partner.name} width="200" height="100" loading="lazy" /> : <span>{partner.name}</span>;
+          return <div key={partner.id || index}>{href ? <a href={href} target="_blank" rel="noopener noreferrer" aria-label={partner.name}>{logo}</a> : logo}</div>;
+        })}</div></div></section>}
+      </main>
+      <footer className="camp-footer"><div className="container">
+        <div className="footer-top"><a className="brand" href="#hero"><img src={c.brand.logo} alt={`Logo ${c.brand.name}`} width="44" height="44" /><span className="brand-text"><span className="brand-name">{c.brand.name}</span><span className="brand-tag">{c.brand.tagline}</span></span></a><nav aria-label={lang === "en" ? "Footer" : "Navigasi footer"}><a href="#program">{t.nav.programs}</a><a href="#jadwal">{t.nav.schedule}</a><a href="#harga">{t.nav.pricing}</a><a href="#kontak">{t.nav.contact}</a></nav></div>
+        <div className="footer-bottom"><span>{t.footer.rights(new Date().getFullYear())}</span><span>{t.footer.madeBy} <a href="https://pagiversestudio.vercel.app/" target="_blank" rel="noopener noreferrer">Pagiverse Studio</a></span></div>
+      </div></footer>
+    </div>
   );
 }
 
 export default function PageContent({ content }) {
-  return (
-    <LanguageProvider>
-      <PageInner content={content} />
-    </LanguageProvider>
-  );
+  return <LanguageProvider><PageInner content={preparePresentationContent(content)} /></LanguageProvider>;
 }
